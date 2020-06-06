@@ -5,7 +5,7 @@ from libs.logger import logger
 
 
 class FilterTool:
-    def __init__(self):
+    def __init__(self) -> None:
         '''加载违规词库到self._againstTuple'''
         _tmpList = []
         _existfile = ('反动词库.txt', '暴恐词库.txt')
@@ -19,7 +19,7 @@ class FilterTool:
         self._againstTuple = tuple(_tmpList)
         del _tmpList, _existfile
 
-    def deal(self, words:str, userInfo=None) -> tuple:
+    def deal(self, words: str, userInfo=None) -> tuple:
         '''
         :param words:    过滤前字符
         :param userInfo: 用户信息，比如ip，用于输出违规日志

@@ -7,7 +7,7 @@ from TIE.settings import LoggerSettings
 
 class Logger:
 
-    def __init__(self, level, w=True, p=True):
+    def __init__(self, level: str, w=True, p=True) -> None:
         '''w:写入文件;p:打印至控制台'''
         self._loggerDict = {
             'ERROR'  : (0, '\033[31mERROR\033[0m'),
@@ -19,11 +19,11 @@ class Logger:
         self._w = w
         self._p = p
 
-    def _to_file(self, info):
+    def _to_file(self, info: str) -> None:
         with open('%s%s.txt' % (LoggerSettings.logFilePath, strftime('%Y-%m-%d')), 'a') as f:
             f.write('%s\n' % info)
 
-    def _output(self, level, info):
+    def _output(self, level: str, info: str) -> None:
         info = '%s [%s] %s %s -> line.%s:%s' % (
             strftime('%Y-%m-%d %H:%M:%S'),   # 时间
             self._loggerDict[level][1],      # 级别
@@ -36,16 +36,16 @@ class Logger:
         if self._p: print(info)
 
 
-    def error(self, info):
+    def error(self, info: str) -> None:
         if self._levelNum >= 0:
             self._output('ERROR', info)
-    def warning(self, info):
+    def warning(self, info: str) -> None:
         if self._levelNum >= 1:
             self._output('WARNING', info)
-    def info(self, info):
+    def info(self, info: str) -> None:
         if self._levelNum >= 2:
             self._output('INFO', info)
-    def debug(self, info):
+    def debug(self, info: str) -> None:
         if self._levelNum >= 3:
             self._output('DEBUG', info)
 
