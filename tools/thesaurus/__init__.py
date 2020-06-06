@@ -23,7 +23,7 @@ class FilterTool:
         '''
         :param words:    过滤前字符
         :param userInfo: 用户信息，比如ip，用于输出违规日志
-        :return: 是：消息； 否：
+        :return: 是：消息； 否：违规消息
         '''
         for i in self._againstTuple:
             if i in words:
