@@ -25,7 +25,7 @@ SECRET_KEY = 'sp(56j0dsy(^6g1y8a8ua6-9qb3aql7j0q_%@6%n-m6!$%5x+y'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -37,6 +37,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    #　自定义APP
+    'chatroom', # 聊天室
+    'news',     # 资讯
+    'tittle'    # 顶栏
 ]
 
 MIDDLEWARE = [
