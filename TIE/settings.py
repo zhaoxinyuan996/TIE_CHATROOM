@@ -134,6 +134,6 @@ class LoggerSettings:
     WARNING = 'WARNING'
     ERROR = 'ERROR'
 
-    logFilePath = '/home/amdin/logs/'
+    logFilePath = '/home/admin/logs/'
 
     level = DEBUG
