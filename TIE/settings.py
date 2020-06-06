@@ -118,3 +118,22 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+
+
+##################################
+# # # # #  自定义配置  # # # # # # #
+##################################
+
+# 日志配置
+class LoggerSettings:
+
+    DEBUG = 'DEBUG'
+    INFO = 'INFO'
+    WARNING = 'WARNING'
+    ERROR = 'ERROR'
+
+    logFilePath = '/home/amdin/logs/'
+
+    level = DEBUG
