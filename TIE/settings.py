@@ -148,3 +148,11 @@ class LoggerSettings:
     logFilePath = '/home/admin/logs/'
 
     level = DEBUG
+
+# jwt配置
+class JWT:
+    # 过期+秒数
+    exp = 604800
+    header = {'alg': 'HS256', 'typ': 'JWT'}
+    payload = {}
+    method = 'HS256'
