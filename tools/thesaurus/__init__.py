@@ -4,7 +4,8 @@ from sys import _getframe
 from libs.logger import logger
 
 
-class FilterTool:
+# 关键词过滤器
+class WordsFilterTool:
     def __init__(self) -> None:
         '''加载违规词库到self._againstTuple'''
         _tmpList = []
@@ -32,4 +33,40 @@ class FilterTool:
         return True, words
 
 
-filterTool = FilterTool()
+# SQL注入过滤器
+class SqlFilterTool:
+    def __init__(self) -> None:
+        self._againstTuple = ("select",
+                              "insert",
+                              "delete",
+                              "count(",
+                              "drop table",
+                              "update",
+                              "truncate",
+                              "asc(",
+                              "mid(",
+                              "char(",
+                              "xp_cmdshell",
+                              "exec",
+                              "master",
+                              "net",
+                              "and",
+                              "or",
+                              "where",
+
+                              '<',
+                              '<=',
+                              '>',
+                              '>=',
+                              '=')
+
+    def deal(self, *values: str) -> bool:
+        '''多个入参，通过返回True，不通过返回False'''
+        for i in self._againstTuple:
+            for j in values:
+                if i in j:
+                    return False
+        return True
+
+wordsFilterTool = WordsFilterTool()
+sqlFilterTool = SqlFilterTool()
