@@ -9,6 +9,7 @@ class Logger:
 
     def __init__(self, level: str, w=True, p=True) -> None:
         '''w:写入文件;p:打印至控制台'''
+        print('logger模块加载')
         self._loggerDict = {
             'ERROR'  : (0, '\033[31mERROR\033[0m'),
             'WARNING': (1, '\033[33mWARNING\033[0m'),

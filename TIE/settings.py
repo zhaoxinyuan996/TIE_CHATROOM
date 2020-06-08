@@ -38,10 +38,16 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    # 预加载
+    'libs',
+    'tools',
+    'tools.thesaurus',
+
     #　自定义APP
-    'chatroom', # 聊天室
-    'news',     # 资讯
-    'tittle'    # 顶栏
+    'app_chatroom', # 聊天室
+    'app_news',     # 资讯
+    'app_tittle',   # 顶栏
+    'app_admin'     # 管理员
 ]
 
 MIDDLEWARE = [
