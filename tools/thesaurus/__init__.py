@@ -12,7 +12,7 @@ class WordsFilterTool:
         _tmpList = []
         _existfile = ('反动词库.txt', '暴恐词库.txt')
 
-        _filterDirPath = os.path.join(_getframe().f_code.co_filename, os.path.pardir)
+        _filterDirPath = os.path.dirname(_getframe().f_code.co_filename)
         for i in os.listdir(_filterDirPath):
             if i in _existfile:
                 with open(os.path.join(_filterDirPath, i,), encoding='utf-8-sig') as f:
