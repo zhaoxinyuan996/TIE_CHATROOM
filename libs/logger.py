@@ -24,29 +24,32 @@ class Logger:
         with open('%s%s.txt' % (LoggerSettings.logFilePath, strftime('%Y-%m-%d')), 'a') as f:
             f.write('%s\n' % info)
 
-    def _output(self, level: str, info: str) -> None:
+    def _output(self, level: str, info0: str) -> None:
+        if isinstance(info0, bytes):
+            info0 = info0.decode()
+
         info = '%s [%s] %s %s -> line.%s:%s' % (
             strftime('%Y-%m-%d %H:%M:%S'),   # 时间
             self._loggerDict[level][1],      # 级别
             currentThread(),                 # 线程号
             _getframe(2).f_code.co_filename, # 所在函数
             _getframe(2).f_lineno,           # 所在行
-            info)
+            info0)
 
         if self._w: self._to_file(info)
         if self._p: print(info)
 
 
-    def error(self, info: str) -> None:
+    def error(self, info: (str, bytes)) -> None:
         if self._levelNum >= 0:
             self._output('ERROR', info)
-    def warning(self, info: str) -> None:
+    def warning(self, info: (str, bytes)) -> None:
         if self._levelNum >= 1:
             self._output('WARNING', info)
-    def info(self, info: str) -> None:
+    def info(self, info: (str, bytes)) -> None:
         if self._levelNum >= 2:
             self._output('INFO', info)
-    def debug(self, info: str) -> None:
+    def debug(self, info: (str, bytes)) -> None:
         if self._levelNum >= 3:
             self._output('DEBUG', info)
 
