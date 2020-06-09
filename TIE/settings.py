@@ -156,3 +156,7 @@ class JWT:
     header = {'alg': 'HS256', 'typ': 'JWT'}
     payload = {}
     method = 'HS256'
+
+#用户配置
+class ChatUserConf:
+    levelTable = [0, 10, 20, 40, 80, 160, 320, 640, 1280, 2560]
