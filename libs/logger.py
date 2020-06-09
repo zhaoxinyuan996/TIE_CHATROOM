@@ -50,7 +50,7 @@ class Logger:
         if self._levelNum >= 3:
             self._output('DEBUG', info)
 
-logger = Logger(LoggerSettings.level)
+logger = Logger(LoggerSettings.level, w=LoggerSettings.writeFile)
 
 if __name__ == '__main__':
     logger = Logger(LoggerSettings.level, w=False)

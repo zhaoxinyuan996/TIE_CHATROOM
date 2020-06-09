@@ -1,4 +1,4 @@
-from TIE.settings import ChatUserConf
+from TIE.settings import ChatUserConf, WordsQueueConf
 
 # 用户类
 class ChatUser():
@@ -9,7 +9,7 @@ class ChatUser():
         self.ip = ip
         self.level = 0
         self.speakTimes = 0
-        self._levelTable = ChatUserConf.levelTable
+        self._levelTable = ChatUserConf.levelTable_speak
 
     def __getattr__(self, item: str) -> None:
         return None

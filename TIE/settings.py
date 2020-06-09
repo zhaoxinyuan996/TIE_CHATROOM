@@ -149,6 +149,8 @@ class LoggerSettings:
 
     level = DEBUG
 
+    writeFile = False
+
 # jwt配置
 class JWT:
     # 过期+秒数
@@ -159,4 +161,9 @@ class JWT:
 
 #用户配置
 class ChatUserConf:
-    levelTable = [0, 10, 20, 40, 80, 160, 320, 640, 1280, 2560]
+    levelTable_speak = [0, 10, 20, 40, 80, 160, 320, 640, 1280, 2560]
+    level_thumbs_up = [0, 1, 2, 4, 8, 160, 640, 128, 256]
+
+# 缓冲池配置
+class WordsQueueConf:
+    maxLenth = 20
