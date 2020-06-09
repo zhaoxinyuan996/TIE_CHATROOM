@@ -21,12 +21,15 @@ class WordsFilterTool:
         self._againstTuple = tuple(_tmpList)
         del _tmpList, _existfile
 
-    def deal(self, words: str, userInfo=None) -> tuple:
+    def deal(self, words: (str, bytes), userInfo=None) -> tuple:
         '''
         :param words:    过滤前字符
         :param userInfo: 用户信息，比如ip，用于输出违规日志
         :return: 是：消息； 否：违规消息
         '''
+        if isinstance(words, bytes):
+            words = words.decode()
+
         for i in self._againstTuple:
             if i in words:
                 logger.warning('user is %s words is "%s", against word "%s"' % (userInfo, words, i))
