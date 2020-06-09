@@ -6,6 +6,8 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from dwebsocket.decorators import require_websocket, accept_websocket
 # Create your views here.
+
+from libs import logger
 from TIE.settings import WordsQueueConf
 from app_chatroom.models import ChatUser
 from tools.thesaurus import wordsFilterTool
@@ -27,20 +29,22 @@ def _all_user_send(m: (str, bytes), q: set) -> None:
 # 加入
 def _join(request: object) -> None:
     msg = '%s 加入' % request
+    logger.debug(msg)
     _all_user_send(msg, sessionSet)
     sessionSet.add(request)
 
 # 发言
 def _speak(msg: str, request: object) -> None:
+    logger.debug(msg)
     if msg:
         code, words = wordsFilterTool.deal(msg, request)
-        if code:
-            _all_user_send(msg, sessionSet)
+        if code: _all_user_send(msg, sessionSet)
 
 # 离开
 def _leave(request: object) -> None:
     sessionSet.remove(request)
     msg = '%s 离开' % request
+    logger.debug(msg)
     _all_user_send(msg, sessionSet)
 
 
