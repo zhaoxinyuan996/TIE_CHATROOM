@@ -1,8 +1,6 @@
 import json
 import time
 
-from queue import Queue
-
 
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -16,32 +14,32 @@ sessionSet = set()
 
 def _all_user_send(m: (str, bytes), q: set) -> None:
     '''m:消息;q:用户池'''
-    if not m: return
+    if not m or not q: return
+
     if isinstance(m, str):
         m = m.encode()
-    print('mmmmmmmmmmmm', m, type(m), sessionSet, q)
-    if q:
-        for i in q:
-            i.websocket.send(m)
+
+    for i in q:
+        i.websocket.send(m)
 
 
-def _join(request):
+def _join(request: object) -> None:
     msg = '%s 加入' % request
     _all_user_send(msg, sessionSet)
     sessionSet.add(request)
 
-def _speak(msg):
+def _speak(msg: str) -> None:
     if msg:
         _all_user_send(msg, sessionSet)
 
-def _leave(request):
+def _leave(request: object) -> None:
     sessionSet.remove(request)
     msg = '%s 离开' % request
     _all_user_send(msg, sessionSet)
 
 
 @accept_websocket
-def cli_accept(request):
+def cli_accept(request) -> HttpResponse:
 
     if request.is_websocket():
 
@@ -54,10 +52,10 @@ def cli_accept(request):
             # 断连
             if request.websocket.is_closed():
                 _leave(request)
-                return HttpResponse(b'LEAVE')
+                return HttpResponse(b'CLIENT LEAVE')
             # 发言
             _speak(msg)
 
-    return HttpResponse(b'EXIT')
+    return HttpResponse(b'FORCED EXIT')
 
 
