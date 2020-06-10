@@ -29,23 +29,32 @@ def _all_user_send(m: (str, bytes), q: set) -> None:
 # 加入
 def _join(request: object) -> None:
     msg = '%s 加入' % request
+    words = json.dumps({'type': 'system', 'name': '系统消息', 'message': msg})
     logger.debug(msg)
-    _all_user_send(msg, sessionSet)
+
+    _all_user_send(words, sessionSet)
     sessionSet.add(request)
 
 # 发言
 def _speak(msg: str, request: object) -> None:
     logger.debug(msg)
+    tmp = json.loads(msg)
+    user = tmp['name']
+    msg = tmp['message']
     if msg:
         code, words = wordsFilterTool.deal(msg, request)
-        if code: _all_user_send(msg, sessionSet)
+        if code:
+            words = json.dumps({'type': 'usermsg', 'name':user, 'message':msg})
+            _all_user_send(words, sessionSet)
 
 # 离开
 def _leave(request: object) -> None:
     sessionSet.remove(request)
     msg = '%s 离开' % request
+    words = json.dumps({'type': 'system', 'name': '系统消息', 'message': msg})
+
     logger.debug(msg)
-    _all_user_send(msg, sessionSet)
+    _all_user_send(words, sessionSet)
 
 
 @accept_websocket
