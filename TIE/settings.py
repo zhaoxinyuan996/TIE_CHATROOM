@@ -149,7 +149,7 @@ class LoggerSettings:
 
     level = DEBUG
 
-    writeFile = False
+    writeFile = True
 
 # jwt配置
 class JWT:

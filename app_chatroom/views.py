@@ -76,4 +76,6 @@ def cli_accept(request) -> HttpResponse:
 
     return HttpResponse(b'FORCED EXIT')
 
-
+def test(request):
+    print(1111)
+    return HttpResponse('ok')
