@@ -58,7 +58,7 @@ class Logger:
 if 'win' in platform.system().lower():
     LoggerSettings.writeFile = False
 
-logger = Logger(LoggerSettings.level, w=LoggerSettings.writeFile)
+myLog = Logger(LoggerSettings.level, w=LoggerSettings.writeFile)
 
 
 if __name__ == '__main__':

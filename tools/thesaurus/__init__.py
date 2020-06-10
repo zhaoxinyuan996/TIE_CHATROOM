@@ -1,7 +1,7 @@
 import os
 from sys import _getframe
 
-from libs.logger import logger
+from libs.log import myLog
 
 
 # 关键词过滤器
@@ -32,7 +32,7 @@ class WordsFilterTool:
 
         for i in self._againstTuple:
             if i in words:
-                logger.warning('user is %s words is "%s", against word "%s"' % (userInfo, words, i))
+                myLog.warning('user is %s words is "%s", against word "%s"' % (userInfo, words, i))
                 return False, '"%s"为违规词汇！' % i
         return True, words
 
