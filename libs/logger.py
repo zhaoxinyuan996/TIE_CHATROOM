@@ -7,7 +7,6 @@ from threading import currentThread, Thread
 
 from TIE.settings import LoggerSettings
 
-queue = Queue()
 def monitor_logger(q: Queue) -> None:
     while True:
         print('start')
@@ -31,6 +30,11 @@ class Logger:
         self._w = w
         self._p = p
 
+        if 'linux' in platform.system().lower():
+            self.queue = Queue()
+            loggerThread = Thread(target=monitor_logger, args=(queue,))
+            loggerThread.start()
+
     def _to_file(self, info: str) -> None:
         with open('%s%s.txt' % (LoggerSettings.logFilePath, strftime('%Y-%m-%d')), 'a') as f:
             f.write('%s\n' % info)
@@ -48,7 +52,7 @@ class Logger:
             info0)
 
         if 'linux' in platform.system().lower():
-            queue.put((level, info))
+            self.queue.put((level, info))
             return
 
         if self._w: self._to_file(info)
@@ -70,9 +74,6 @@ class Logger:
 
 logger = Logger(LoggerSettings.level, w=LoggerSettings.writeFile)
 
-if 'linux' in platform.system().lower():
-    loggerThread = Thread(target=monitor_logger, args=(queue, ))
-    loggerThread.start()
 
 if __name__ == '__main__':
     logger = Logger(LoggerSettings.level, w=False)
