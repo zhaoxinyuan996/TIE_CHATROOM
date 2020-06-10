@@ -1,12 +1,15 @@
+import base64
+import hashlib
 import json
 import time
+import random
+import socket
 
 from collections import deque
 from django.http import HttpResponse
 from django.shortcuts import render
-from dwebsocket.decorators import require_websocket, accept_websocket
 # Create your views here.
-
+from dwebsocket.decorators import require_websocket, accept_websocket
 from libs import logger
 from TIE.settings import WordsQueueConf
 from app_chatroom.models import ChatUser
@@ -48,23 +51,78 @@ def _leave(request: object) -> None:
     _all_user_send(msg, sessionSet)
 
 
+def _get_wsgi_sock(request):
+    if 'gunicorn.socket' in request.META:
+        sock = request.META['gunicorn.socket']
+    else:
+        wsgi_input = request.META['wsgi.input']
+        if hasattr(wsgi_input, '_sock'):
+            sock = wsgi_input._sock
+        elif hasattr(wsgi_input, 'rfile'):  # gevent
+            if hasattr(wsgi_input.rfile, '_sock'):
+                sock = wsgi_input.rfile._sock
+            else:
+                sock = wsgi_input.rfile.raw._sock
+        elif hasattr(wsgi_input, 'raw'):
+            sock = wsgi_input.raw._sock
+        elif hasattr(wsgi_input, 'stream') and hasattr(wsgi_input.stream, 'raw'):
+            sock = wsgi_input.stream.raw._sock
+        else:
+            raise ValueError('Socket not found in wsgi.input')
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    return sock
+
+l = []
+random.choice('abcdefghijklmnopqrstuvwxyz!@#$%^&*()')
+
+accept_header = (
+            "HTTP/1.1 101 Switching Protocols\r\n"
+            "Upgrade: websocket\r\n"
+            "Connection: Upgrade\r\n"
+            "Sec-WebSocket-Accept: %s\r\n"
+            )
+
+
+def compute_accept_value(key):
+    """Computes the value for the Sec-WebSocket-Accept header,
+    given the value for Sec-WebSocket-Key.
+    """
+    sha1 = hashlib.sha1()
+    sha1.update(key.encode())
+    sha1.update(b"258EAFA5-E914-47DA-95CA-C5AB0DC85B11")  # Magic value
+    return base64.b64encode(sha1.digest())
+
 @accept_websocket
 def cli_accept(request) -> HttpResponse:
     '''客户端总处理函数'''
-    if request.is_websocket():
+    h = request.META['HTTP_SEC_WEBSOCKET_KEY']
+    cliSocket = _get_wsgi_sock(request)
+    l.append(cliSocket)
+    k = compute_accept_value(h)
+    s = accept_header % k.decode().encode()
+    if isinstance(s, str): s = s.encode()
+    cliSocket.send(s)
+    while True:
+        print('send')
+        cliSocket.send(b'111')
+        break
 
 
-        _join(request)
 
-        while True:
-            msg = request.websocket.wait()
-
-            if request.websocket.is_closed():
-                _leave(request)
-                return HttpResponse(b'CLIENT LEAVE')
-
-            _speak(msg, request)
-
-    return HttpResponse(b'FORCED EXIT')
+    # if request.is_websocket():
+    #
+    #
+    #     _join(request)
+    #
+    #     while True:
+    #         msg = request.websocket.wait()
+    #
+    #         if request.websocket.is_closed():
+    #             _leave(request)
+    #             return HttpResponse(b'CLIENT LEAVE')
+    #
+    #         _speak(msg, request)
+    #
+    # return HttpResponse(b'FORCED EXIT')
 
 

@@ -1,3 +1,5 @@
+from socket import *
+
 from TIE.settings import ChatUserConf, WordsQueueConf
 
 # 用户类
@@ -21,3 +23,7 @@ class ChatUser():
             return words, self.level
 
         return words, None
+
+class SocketPool():
+    def __init__(self):
+        self.pool = {}
