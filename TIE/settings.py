@@ -51,7 +51,7 @@ INSTALLED_APPS = [
     'app_admin'     # 管理员
 ]
 
-ASGI_APPLICATION = 'django_websocket.routing.application' #自己routing的路径
+ASGI_APPLICATION = 'TIE.routing.application' #自己routing的路径
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
