@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'channels',
     # 预加载
     'libs',
     'tools',
@@ -49,6 +50,16 @@ INSTALLED_APPS = [
     'app_tittle',   # 顶栏
     'app_admin'     # 管理员
 ]
+
+ASGI_APPLICATION = 'django_websocket.routing.application' #自己routing的路径
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)], #需修改redis的地址
+        },
+    },
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

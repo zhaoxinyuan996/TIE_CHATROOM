@@ -57,11 +57,10 @@ def _leave(request: object) -> None:
     _all_user_send(words, sessionSet)
 
 
-@accept_websocket
+# @accept_websocket
 def cli_accept(request) -> HttpResponse:
     '''客户端总处理函数'''
     if request.is_websocket():
-
 
         _join(request)
 
