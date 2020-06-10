@@ -123,10 +123,7 @@
                 var umsg = msg.message; //消息文本
                 var uname = msg.name; //发送人
                 i++;
-                console.log(msg);
-                console.log(type);
-                console.log(umsg);
-                console.log(uname);
+
                 if (type == 'usermsg') {
                     $('.show-area').append('<p class="bg-success message"><i class="glyphicon glyphicon-user"></i><a name="' + i + '"></a><span class="label label-primary">' + uname + ' : </span>' + umsg + '</p>');
                 }
