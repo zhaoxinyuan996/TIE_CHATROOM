@@ -38,6 +38,7 @@ def _join(request: object) -> None:
 # 发言
 def _speak(msg: str, request: object) -> None:
     myLog.debug(msg)
+    if isinstance(msg, bytes): msg = msg.decode()
     tmp = json.loads(msg)
     user = tmp['name']
     msg = tmp['message']
