@@ -7,7 +7,7 @@ from jwt import ExpiredSignatureError
 
 from TIE.settings import JWT
 from libs.secret import Secret
-from libs.logger import logger
+from libs.log import myLog
 
 
 def gen_token(key: str, expire=3600) -> str:
@@ -37,7 +37,7 @@ def certify_token(key: str, token: str) -> bool:
 
         return True
     except Exception as e:
-        logger.warning('tocken check error, key is %s, token is %s; e is %s' % (key, token, e))
+        myLog.warning('tocken check error, key is %s, token is %s; e is %s' % (key, token, e))
         return False
 
 def gen_jwt(payload: dict) -> str:

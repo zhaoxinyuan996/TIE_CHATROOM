@@ -7,7 +7,7 @@ from django.shortcuts import render
 from dwebsocket.decorators import require_websocket, accept_websocket
 # Create your views here.
 
-from libs import logger
+from libs.log import myLog
 from TIE.settings import WordsQueueConf
 from app_chatroom.models import ChatUser
 from tools.thesaurus import wordsFilterTool
@@ -29,30 +29,38 @@ def _all_user_send(m: (str, bytes), q: set) -> None:
 # 加入
 def _join(request: object) -> None:
     msg = '%s 加入' % request
-    logger.debug(msg)
-    _all_user_send(msg, sessionSet)
+    words = json.dumps({'type': 'system', 'name': '系统消息', 'message': msg})
+    myLog.debug(msg)
+
+    _all_user_send(words, sessionSet)
     sessionSet.add(request)
 
 # 发言
 def _speak(msg: str, request: object) -> None:
-    logger.debug(msg)
+    myLog.debug(msg)
+    tmp = json.loads(msg)
+    user = tmp['name']
+    msg = tmp['message']
     if msg:
         code, words = wordsFilterTool.deal(msg, request)
-        if code: _all_user_send(msg, sessionSet)
+        if code:
+            words = json.dumps({'type': 'usermsg', 'name':user, 'message':msg})
+            _all_user_send(words, sessionSet)
 
 # 离开
 def _leave(request: object) -> None:
     sessionSet.remove(request)
     msg = '%s 离开' % request
-    logger.debug(msg)
-    _all_user_send(msg, sessionSet)
+    words = json.dumps({'type': 'system', 'name': '系统消息', 'message': msg})
+
+    myLog.debug(msg)
+    _all_user_send(words, sessionSet)
 
 
 @accept_websocket
 def cli_accept(request) -> HttpResponse:
     '''客户端总处理函数'''
     if request.is_websocket():
-
 
         _join(request)
 
@@ -67,4 +75,6 @@ def cli_accept(request) -> HttpResponse:
 
     return HttpResponse(b'FORCED EXIT')
 
-
+def test(request):
+    print(1111)
+    return HttpResponse('ok')
