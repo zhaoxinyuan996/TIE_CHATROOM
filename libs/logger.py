@@ -1,8 +1,19 @@
+import platform
+
+from queue import Queue
 from time import strftime
 from sys import _getframe
-from threading import currentThread
+from threading import currentThread, Thread
 
 from TIE.settings import LoggerSettings
+
+queue = Queue()
+def monitor_logger(q: Queue) -> None:
+    while True:
+        print('start')
+        level, msg = q.get()
+        print(level, msg)
+        logger._output(level, msg)
 
 
 class Logger:
@@ -36,6 +47,10 @@ class Logger:
             _getframe(2).f_lineno,           # 所在行
             info0)
 
+        if 'linux' in platform.system().lower():
+            queue.put((level, info))
+            return
+
         if self._w: self._to_file(info)
         if self._p: print(info)
 
@@ -54,6 +69,10 @@ class Logger:
             self._output('DEBUG', info)
 
 logger = Logger(LoggerSettings.level, w=LoggerSettings.writeFile)
+
+if 'linux' in platform.system().lower():
+    loggerThread = Thread(target=monitor_logger, args=(queue, ))
+    loggerThread.start()
 
 if __name__ == '__main__':
     logger = Logger(LoggerSettings.level, w=False)
