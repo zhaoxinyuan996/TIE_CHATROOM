@@ -1,11 +1,16 @@
 import base64
 import hashlib
 import json
+import os
+import struct
 import time
 import random
 import socket
+import array
 
 from collections import deque
+
+import six
 from django.http import HttpResponse
 from django.shortcuts import render
 # Create your views here.
@@ -84,28 +89,78 @@ accept_header = (
 
 
 def compute_accept_value(key):
-    """Computes the value for the Sec-WebSocket-Accept header,
-    given the value for Sec-WebSocket-Key.
-    """
     sha1 = hashlib.sha1()
     sha1.update(key.encode())
     sha1.update(b"258EAFA5-E914-47DA-95CA-C5AB0DC85B11")  # Magic value
     return base64.b64encode(sha1.digest())
 
-@accept_websocket
+def mask_or_unmask(mask, data):
+    mask = array.array("B", mask)
+    unmasked = array.array("B", data)
+    for i in range(len(data)):
+        unmasked[i] = unmasked[i] ^ mask[i % 4]
+    if hasattr(unmasked, 'tobytes'):
+        return unmasked.tobytes()
+    else:
+        return unmasked.tostring()
+def _write_frame(sock, data, fin=True, opcode=0x1):
+    mask_outgoing = False
+    if fin:
+        finbit = 0x80
+    else:
+        finbit = 0
+    frame = struct.pack("B", finbit | opcode)
+    l = len(data)
+    if mask_outgoing:
+        mask_bit = 0x80
+    else:
+        mask_bit = 0
+    if l < 126:
+        frame += struct.pack("B", l | mask_bit)
+    elif l <= 0xFFFF:
+        frame += struct.pack("!BH", 126 | mask_bit, l)
+    else:
+        frame += struct.pack("!BQ", 127 | mask_bit, l)
+    if mask_outgoing:
+        mask = os.urandom(4)
+        data = mask + mask_or_unmask(mask, data)
+    if isinstance(data, six.text_type):
+        data = data.encode('utf-8')
+    frame += data
+    try:
+        sock.sendall(frame)
+        print('frame', frame)
+    except socket.error:
+        sock.close()
+
+from threading import Thread
+def rec(s):
+    while True:
+        try:
+            r = s.recv(1024)
+            print('r是', r)
+        except:pass
+# @accept_websocket
 def cli_accept(request) -> HttpResponse:
     '''客户端总处理函数'''
     h = request.META['HTTP_SEC_WEBSOCKET_KEY']
     cliSocket = _get_wsgi_sock(request)
     l.append(cliSocket)
     k = compute_accept_value(h)
-    s = accept_header % k.decode().encode()
+    s = accept_header % k.decode()
+
+    print(s)
     if isinstance(s, str): s = s.encode()
+    # t = Thread(target=rec, args=(cliSocket, ))
+    # t.start()
     cliSocket.send(s)
-    while True:
+
+    # _write_frame(cliSocket, 'this is data'.encode())
+    for i in range(5):
+        pass
         print('send')
-        cliSocket.send(b'111')
-        break
+        _write_frame(cliSocket, 'this is data'.encode())
+        # break
 
 
 
@@ -123,6 +178,6 @@ def cli_accept(request) -> HttpResponse:
     #
     #         _speak(msg, request)
     #
-    # return HttpResponse(b'FORCED EXIT')
+    return HttpResponse(b'FORCED EXIT')
 
 
