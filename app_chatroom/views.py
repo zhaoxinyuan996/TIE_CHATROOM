@@ -85,8 +85,6 @@ import logging
 logger = logging.getLogger('log')
 
 def test(request):
-    logger.debug("一个萌萌的请求过来了。。。。")
-    logger.info("一个更萌的请求过来了。。。。")
-    logger.debug("这是app01里面的index视图函数")
+    print(sessionSet)
 
     return HttpResponse("OK")
