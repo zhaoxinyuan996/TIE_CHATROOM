@@ -4,6 +4,8 @@ import traceback
 from collections import deque
 
 # Create your views here.
+from django.http import HttpResponse
+
 from libs import myLog
 from TIE.settings import WordsQueueConf
 from app_chatroom.models import ChatUser, ShortMsgError
@@ -52,6 +54,9 @@ def _leave(obj: ChatUser) -> None:
     msg = {"message": msg, "type": "system"}
     _all_user_send(msg, sessionSet)
 
+
+# VIEWS
+
 def cli_accept(request) -> None:
     '''客户端总处理函数'''
     cliSocket = ChatUser(request)
@@ -75,3 +80,14 @@ def cli_accept(request) -> None:
         myLog.error(traceback.format_exc())
         _leave(cliSocket)
         sessionSet.remove(cliSocket)
+
+import logging
+# 生成一个以当前文件名为名字的logger实例
+logger = logging.getLogger(__name__)
+
+def test(request):
+    logger.debug("一个萌萌的请求过来了。。。。")
+    logger.info("一个更萌的请求过来了。。。。")
+    logger.debug("这是app01里面的index视图函数")
+
+    return HttpResponse("OK")
