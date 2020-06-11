@@ -46,7 +46,8 @@ def _speak(msg: (str, bytes)) -> None:
 
     if isinstance(msg, bytes):
         msg = msg.decode()
-    msg = json.loads(msg)
+    try: msg = json.loads(msg)
+    except: return
     msg['type'] = 'usermsg'
 
     _all_user_send(json.dumps(msg), sessionSet)
@@ -84,6 +85,9 @@ def cli_accept(request) -> HttpResponse:
         except CustomSerDisconnect:     # 超时未发言强制断连
             _leave(cliSocket)
             del sessionSet[cliSocket]
+
+        except UnicodeDecodeError:
+            myLog.warning(traceback.format_exc())
 
         except:                         # 其他错误
             myLog.error(traceback.format_exc())
