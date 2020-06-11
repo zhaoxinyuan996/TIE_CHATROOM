@@ -82,8 +82,7 @@ def cli_accept(request) -> None:
         sessionSet.remove(cliSocket)
 
 import logging
-# 生成一个以当前文件名为名字的logger实例
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('log')
 
 def test(request):
     logger.debug("一个萌萌的请求过来了。。。。")
