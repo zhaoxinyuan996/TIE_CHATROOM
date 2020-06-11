@@ -125,7 +125,7 @@ class ChatUser:
             raise CustomCliMsgError('%s 断连' % self.ip)
         if b'Masked frame from server' in msg:
             return False
-        code, msg = wordsFilterTool.deal(msg)
+        code, msg = wordsFilterTool.deal(msg, userInfo=self.ip)
         if code:
             return True
 
