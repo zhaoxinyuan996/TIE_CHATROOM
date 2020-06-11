@@ -4,5 +4,4 @@ from .views import *
 
 urlpatterns = [
     url('chat', cli_accept),
-    url('test', test)
 ]
