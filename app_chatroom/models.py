@@ -28,7 +28,7 @@ def loop_check_disconnect(*sessionSet):
         for i in sessionSet:
             for j in i:
                 if t - i[j] > ChatUserPoolConf.timeout:
-                    i.close()
+                    j.close()
 
         time.sleep(ChatUserPoolConf.loolTime)
 
