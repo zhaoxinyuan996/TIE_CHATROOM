@@ -88,9 +88,11 @@
     <div class="title">简易聊天demo</div>
     <div class="content">
         <div class="show-area"></div>
+        <div id="output" style="border:1px solid #ccc;height:365px;overflow: auto;margin-left:15px"></div>
         <div class="write-area">
             <div>
                 <button class="btn btn-default send">发送</button>
+                <button type="button" class="btn btn-default" onclick='addsocket();'>连接</button>
             </div>
             <div><input name="name" id="name" type="text" placeholder="input your name"></div>
             <div>
@@ -103,95 +105,93 @@
 <script src="http://libs.baidu.com/jquery/1.9.1/jquery.min.js"></script>
 <script src="https://cdn.bootcss.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
 <script>
-    $(function () {
-        var wsurl = 'ws://127.0.0.1/chat/chat';
-        var websocket;
-        var i = 0;
-        if (window.WebSocket) {
-            websocket = new WebSocket(wsurl);
+    var output;
+    function init() {
+    output = document.getElementById("output");
+    testWebSocket();
+}
+function addsocket() {
+	var wsaddr = 'ws://localhost/chat/chat';
+	if (wsaddr=='') {
+		alert("请填写websocket的地址");
+		return false;
+	}
+	StartWebSocket(wsaddr);
+}
 
-            //连接建立
-            websocket.onopen = function (evevt) {
-                console.log("Connected to WebSocket server.");
-                $('.show-area').append('<p class="bg-info message"><i class="glyphicon glyphicon-info-sign"></i>Connected to WebSocket server!</p>');
-            }
-            //收到消息
-            websocket.onmessage = function (event) {
-                var msg = JSON.parse(event.data); //解析收到的json消息数据
+function closesocket() {
+	websocket.close();
+}
+function   formatData(evt)   {
+                console.log(evt);
+              data = JSON.parse(evt.data);
+              header = data.type;
+              msg = data.usermsg;
 
-                var type = msg.type; // 消息类型
-                var umsg = msg.message; //消息文本
-                var uname = msg.name; //发送人
-                i++;
+              return header + ':' + msg
+   }
+function StartWebSocket(wsUri) {
+    websocket = new WebSocket(wsUri);
+    websocket.onopen = function(evt) { onOpen(evt) };
+    websocket.onclose = function(evt) { onClose(evt) };
+    websocket.onmessage = function(evt) { onMessage(evt) };
+    websocket.onerror = function(evt) { onError(evt) }; }
 
-                if (type == 'usermsg') {
-                    $('.show-area').append('<p class="bg-success message"><i class="glyphicon glyphicon-user"></i><a name="' + i + '"></a><span class="label label-primary">' + uname + ' : </span>' + umsg + '</p>');
-                }
-                if (type == 'system') {
-                    $('.show-area').append('<p class="bg-warning message"><a name="' + i + '"></a><i class="glyphicon glyphicon-info-sign"></i>' + umsg + '</p>');
-                }
+    function onOpen(evt) {
+	   writeToScreen("<span style='color:red'>连接成功，现在你可以发送信息啦！！！</span>");
+	}
+    function onClose(evt) {
+        writeToScreen("<span style='color:red'>websocket连接已断开!!!</span>");
+		websocket.close();
+	}
+    function onMessage(evt) {
+	   writeToScreen('<span style="color:blue">服务端回应&nbsp;'+formatData(evt)+'</span><br/><span class="bubble">'+ evt.data+'</span>');
+	}
+    function onError(evt) {
+        writeToScreen('<span style="color: red;">发生错误:</span> '+ evt.data);
+	}
+    function doSend() {
+	    var message=$("#message").val();
+		if (message=='') {
+			alert("请先填写发送信息");
+			$("#message").focus();
+			return false;
+		}
+		if (typeof websocket==="undefined"){
+			alert("websocket还没有连接，或者连接失败，请检测");
+			return false;
+		}
+		if (websocket.readyState==3) {
+			alert("websocket已经关闭，请重新连接");
+			return false;
+		}
+		console.log(websocket);
+		$("#message").val('');
+		writeToScreen('<span style="color:green">你发送的信息&nbsp;'+formatDate(new Date())+'</span><br/>'+ message);
+        websocket.send(message);
+		}
 
-                $('#message').val('');
-                window.location.hash = '#' + i;
-            }
+    function writeToScreen(message) {
 
-            //发生错误
-            websocket.onerror = function (event) {
-                i++;
-                console.log("Connected to WebSocket server error");
-                $('.show-area').append('<p class="bg-danger message"><a name="' + i + '"></a><i class="glyphicon glyphicon-info-sign"></i>Connect to WebSocket server error.</p>');
-                window.location.hash = '#' + i;
-            }
 
-            //连接关闭
-            websocket.onclose = function (event) {
-                i++;
-                console.log('websocket Connection Closed. ');
-                $('.show-area').append('<p class="bg-warning message"><a name="' + i + '"></a><i class="glyphicon glyphicon-info-sign"></i>websocket Connection Closed.</p>');
-                window.location.hash = '#' + i;
-            }
 
-            function send() {
-                var name = $('#name').val();
-                var message = $('#message').val();
-                if (!name) {
-                    alert('请输入用户名!');
-                    return false;
-                }
-                if (!message) {
-                    alert('发送消息不能为空!');
-                    return false;
-                }
-                var msg = {
-                    message: message,
-                    name: name
-                };
-                try {
-                    websocket.send(JSON.stringify(msg));
-                } catch (ex) {
-                    console.log(ex);
-                }
-            }
-
-            //按下enter键发送消息
-            $(window).keydown(function (event) {
-                if (event.keyCode == 13) {
-                    console.log('user enter');
-                    send();
-                }
-            });
-
-            //点发送按钮发送消息
-            $('.send').bind('click', function () {
-                send();
-            });
-
+		var div = "<div class='newmessage'>"+message+"</div>";
+		var d = $("#output");
+		var d=d[0];
+        var doScroll = d.scrollTop == d.scrollHeight - d.clientHeight;
+		$("#output").append(div);
+        if (doScroll) {
+            d.scrollTop = d.scrollHeight - d.clientHeight;
         }
-        else {
-            alert('该浏览器不支持web socket');
-        }
+		}
 
-    });
+
+    function en(event){
+		var evt=evt?evt:(window.event?window.event:null);
+        if (evt.keyCode==13){
+         doSend()
+        }
+	}
 </script>
 </body>
 </html>
