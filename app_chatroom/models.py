@@ -1,6 +1,7 @@
 import os
 import six
 import time
+import json
 import array
 import base64
 import select
@@ -37,6 +38,7 @@ class CustomCliMsgError(Exception): pass
 # 超时未发言服务器主动断连
 class CustomSerDisconnect(Exception): pass
 
+# 聊天室用户类
 class ChatUser:
     def __init__(self, request):
         if 'HTTP_X_FORWARDED_FOR' in request.META:
@@ -120,11 +122,13 @@ class ChatUser:
     def check_syntax(self, msg: bytes) -> bool:
         if msg == b'\x03\xe9':
             raise CustomCliMsgError('%s 断连' % self.ip)
-
+        if b'Masked frame from server' in msg:
+            return False
         code, msg = wordsFilterTool.deal(msg)
         if code:
             return True
 
+        msg = json.dumps({"message": msg, "type": "system"}).encode()
         self._write_frame(msg)
 
     def send(self, words: bytes) -> None:
@@ -135,8 +139,10 @@ class ChatUser:
         return rec
 
     def close(self) -> None:
-        self.sock.shutdown(2)
-        self.sock.close()
+        try:
+            self.sock.shutdown(2)
+            self.sock.close()
+        except: pass
 
     def _read_frame(self) -> tuple:
         header_bytes = self._read_strict(2)

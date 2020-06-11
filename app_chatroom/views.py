@@ -81,10 +81,12 @@ def cli_accept(request) -> HttpResponse:
         except CustomCliMsgError:       # 客户端主动断连
             _leave(cliSocket)
             del sessionSet[cliSocket]
+            myLog.debug(CustomCliMsgError)
 
         except CustomSerDisconnect:     # 超时未发言强制断连
             _leave(cliSocket)
             del sessionSet[cliSocket]
+            myLog.debug(CustomSerDisconnect)
 
         except UnicodeDecodeError:
             myLog.warning(traceback.format_exc())
