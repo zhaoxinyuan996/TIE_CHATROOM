@@ -42,15 +42,16 @@ def _join(obj: ChatUser) -> None:
 
 # 发言
 def _speak(msg: (str, bytes)) -> None:
-    myLog.debug(msg)
+    if msg:
+        myLog.debug(msg)
 
-    if isinstance(msg, bytes):
-        msg = msg.decode()
-    try: msg = json.loads(msg)
-    except: return
-    msg['type'] = 'usermsg'
+        if isinstance(msg, bytes):
+            msg = msg.decode()
+        try: msg = json.loads(msg)
+        except: return
+        msg['type'] = 'usermsg'
 
-    _all_user_send(json.dumps(msg), sessionSet)
+        _all_user_send(json.dumps(msg), sessionSet)
 
 # 离开
 def _leave(obj: ChatUser) -> None:

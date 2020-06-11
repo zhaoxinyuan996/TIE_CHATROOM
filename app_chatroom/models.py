@@ -22,12 +22,13 @@ accept_header = (
             )
 
 # 子线程定时踢出
-def loop_check_disconnect(sessionSet):
+def loop_check_disconnect(*sessionSet):
     while True:
         t = time.time()
         for i in sessionSet:
-            if t - sessionSet[i] > ChatUserPoolConf.timeout:
-                i.close()
+            for j in i:
+                if t - i[j] > ChatUserPoolConf.timeout:
+                    i.close()
 
         time.sleep(ChatUserPoolConf.loolTime)
 
