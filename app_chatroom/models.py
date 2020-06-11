@@ -1,18 +1,16 @@
-import json
+import os
+import six
+import time
 import array
 import base64
-import hashlib
-import os
 import select
 import struct
-
-import six
 import socket
+import hashlib
 
 from libs import myLog
 from tools.thesaurus import wordsFilterTool
-from TIE.settings import ChatUserConf, WordsQueueConf
-
+from TIE.settings import ChatUserConf, ChatUserPoolConf
 
 accept_header = (
             "HTTP/1.1 101 Switching Protocols\r\n"
@@ -22,10 +20,24 @@ accept_header = (
             "\r\n"
             )
 
-# 自定义，声明断连
-class ShortMsgError(Exception): pass
+# 子线程定时踢出
+def loop_check_disconnect(sessionSet):
+    while True:
+        t = time.time()
+        for i in sessionSet:
+            if t - sessionSet[i] > ChatUserPoolConf.timeout:
+                i.close()
 
-class ChatUser():
+        time.sleep(ChatUserPoolConf.loolTime)
+
+
+# 客户端声明断连
+class CustomCliMsgError(Exception): pass
+
+# 超时未发言服务器主动断连
+class CustomSerDisconnect(Exception): pass
+
+class ChatUser:
     def __init__(self, request):
         if 'HTTP_X_FORWARDED_FOR' in request.META:
             self.ip = request.META['HTTP_X_FORWARDED_FOR']
@@ -100,14 +112,14 @@ class ChatUser():
         while remaining:
             _buffer = self.sock.recv(remaining)
             if not _buffer:
-                raise socket.error(socket.EBADF, 'Bad file descriptor')
+                raise CustomSerDisconnect('%s 超时' % self.ip)
             _bytes += _buffer
             remaining = bufsize - len(_bytes)
         return _bytes
 
     def check_syntax(self, msg: bytes) -> bool:
         if msg == b'\x03\xe9':
-            raise ShortMsgError('%s 断连' % self.ip)
+            raise CustomCliMsgError('%s 断连' % self.ip)
 
         code, msg = wordsFilterTool.deal(msg)
         if code:
@@ -121,6 +133,10 @@ class ChatUser():
     def read(self) -> bytes:
         _, _, rec = self._read_frame()
         return rec
+
+    def close(self) -> None:
+        self.sock.shutdown(2)
+        self.sock.close()
 
     def _read_frame(self) -> tuple:
         header_bytes = self._read_strict(2)
@@ -153,6 +169,7 @@ class ChatUser():
         except select.error as err:
             if err.args[0] == 4:
                 return False
+            self.sock.shutdown(2)
             self.sock.close()
         return self.sock in r
 
@@ -183,4 +200,5 @@ class ChatUser():
         try:
             self.sock.sendall(frame)
         except socket.error:
+            self.sock.shutdown(2)
             self.sock.close()
