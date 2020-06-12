@@ -12,7 +12,7 @@ import hashlib
 from collections import deque
 from functools import partial
 
-from libs import myLog
+from libs.cls import BaseError
 from tools.thesaurus import wordsFilterTool
 from TIE.settings import ChatUserConf, ChatUserPoolConf, ChatRoomPoolConf, WordsQueueConf
 
@@ -38,29 +38,27 @@ def loop_check_disconnect(chatRoomPool:dict):
         time.sleep(ChatUserPoolConf.loolTime)
 
 # 客户端用户名非法
-class CustomCliNameError(Exception): pass
+class CustomCliNameError(BaseError): pass
 
 # 客户端聊天室非法
-class CustomCliChatroomNumError(Exception): pass
+class CustomCliChatroomNumError(BaseError): pass
 
 # 客户端声明断连
-class CustomCliMsgError(Exception): pass
+class CustomCliMsgError(BaseError): pass
 
 # 超时未发言服务器主动断连
-class CustomSerDisconnect(Exception): pass
+class CustomSerDisconnect(BaseError): pass
 
 # 聊天室用户类
 class ChatUser:
-    def __init__(self, request):
-        if 'HTTP_X_FORWARDED_FOR' in request.META:
-            self.ip = request.META['HTTP_X_FORWARDED_FOR']
-        else:
-            self.ip = request.META['REMOTE_ADDR']
+    def __init__(self, request, roomList):
 
         self.level = 0
         self.speakTimes = 0
-        self._levelTable = ChatUserConf.levelTable_speak
+        self._r = roomList
         self.request = request
+        self.ip = self.get_ip(self.request)
+        self._levelTable = ChatUserConf.levelTable_speak
         self.sock = self._get_wsgi_sock(request)
 
         # check
@@ -69,26 +67,42 @@ class ChatUser:
 
         self.handshake()
 
+        del self._r
+
     def __getattr__(self, item: str) -> None:
         return None
 
+    @staticmethod
+    def get_ip(request):
+        if 'HTTP_X_FORWARDED_FOR' in request.META:
+            ip = request.META['HTTP_X_FORWARDED_FOR']
+        else:
+            ip = request.META['REMOTE_ADDR']
+        return ip
+
+    # @staticmethod
+    # def get_ip(request):
+    #     if 'HTTP_X_FORWARDED_FOR' in request.META:
+    #         ip = request.META['HTTP_X_FORWARDED_FOR']
+    #     else:
+    #         ip = request.META['REMOTE_ADDR']
+    #     return ip
+
     def _check_chatroom_num(self):
-        if self.request.GET.get('roomNum'):
+        if self.request.GET.get('roomNum') in self._r:
             return self.request.GET.get('roomNum')
         raise CustomCliChatroomNumError
 
-    def _check_name(self, name):
+    def _check_name(self, name: str):
+        name = name.replace(' ', '')
         code, msg = wordsFilterTool.deal(name, userInfo=self.ip)
         if code: return name
         raise CustomCliNameError
 
-    def speak(self, words: str) -> tuple:
+    def speak_exp(self) -> None:
         self.speakTimes += 1
         if self.speakTimes in self._levelTable:
             self.level = self._levelTable.index(self.speakTimes)
-            return words, self.level
-
-        return words, None
 
     def handshake(self) -> None:
         k = self._compute_accept_value(self.request.META['HTTP_SEC_WEBSOCKET_KEY'])
@@ -178,7 +192,6 @@ class ChatUser:
         mask = b2 >> 7 & 1
         length = b2 & 0x7f
 
-        length_data = ""
         if length == 0x7e:
             length_data = self._read_strict(2)
             length = struct.unpack("!H", length_data)[0]
@@ -234,15 +247,25 @@ class ChatUser:
             self.sock.shutdown(2)
             self.sock.close()
 
-# 聊天室   {'编号':[[{套接字:最后活跃时间}},{}], 聊天缓存池]}
+# 聊天室   {'编号':[[{套接字:最后活跃时间}},{}], [聊天缓存池]]}
 class ChatRoomPool(dict):
     def __init__(self, num: int) -> None:
         for i in range(1, num + 1):
             self.add(str(i))
         super().__init__()
 
+    def keys(self):
+        return list(super().keys())
+
     def add(self, key: str) -> None:
         self[key] = [{}, wordsQueue()]
+
+    def clear(self, *keys: tuple) -> None:
+        if not keys:
+            keys = self.keys()
+
+        for key in keys:
+            self._release(*self[key])
 
     def _release(self, userPool: dict, chatPool: list) -> None:
         tmpList = []
@@ -255,12 +278,5 @@ class ChatRoomPool(dict):
                 i.close()
             except:
                 print('这里释放有问题')
-
-    def clear(self, *keys: tuple) -> None:
-        if not keys:
-            keys = self.keys()
-
-        for key in keys:
-            self._release(*self[key])
 
 chatRoomPool = ChatRoomPool(ChatRoomPoolConf.roomNumber)
