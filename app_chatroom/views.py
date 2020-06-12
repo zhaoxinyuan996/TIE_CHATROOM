@@ -46,6 +46,7 @@ def _speak(obj:ChatUser, msg: (str, bytes)) -> None:
         try: msg = json.loads(msg)
         except: return
         msg['type'] = 'usermsg'
+        msg['name'] = obj.name
         msg['time'] = time.time()
 
         _all_user_send(json.dumps(msg), chatRoomPool[obj.roomNum][0])

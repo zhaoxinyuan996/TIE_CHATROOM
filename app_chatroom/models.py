@@ -73,8 +73,8 @@ class ChatUser:
         return None
 
     def _check_chatroom_num(self):
-        if self.request.get('roomNum'):
-            return self.request.get('roomNum')
+        if self.request.GET.get('roomNum'):
+            return self.request.GET.get('roomNum')
         raise CustomCliChatroomNumError
 
     def _check_name(self, name):
