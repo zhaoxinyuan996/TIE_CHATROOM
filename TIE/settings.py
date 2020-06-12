@@ -165,6 +165,10 @@ class ChatUserConf:
     levelTable_speak = [0, 10, 20, 40, 80, 160, 320, 640, 1280, 2560]
     level_thumbs_up = [0, 1, 2, 4, 8, 160, 640, 128, 256]
 
+# 聊天室配置
+class ChatRoomPoolConf:
+    roomNumber = 1
+
 # 用户池配置
 class  ChatUserPoolConf:
     loolTime = 10

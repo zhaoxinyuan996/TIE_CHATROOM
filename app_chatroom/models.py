@@ -9,9 +9,14 @@ import struct
 import socket
 import hashlib
 
+from collections import deque
+from functools import partial
+
 from libs import myLog
 from tools.thesaurus import wordsFilterTool
-from TIE.settings import ChatUserConf, ChatUserPoolConf
+from TIE.settings import ChatUserConf, ChatUserPoolConf, ChatRoomPoolConf, WordsQueueConf
+
+wordsQueue = partial(deque,maxlen=WordsQueueConf.maxLenth)
 
 accept_header = (
             "HTTP/1.1 101 Switching Protocols\r\n"
@@ -22,16 +27,21 @@ accept_header = (
             )
 
 # 子线程定时踢出
-def loop_check_disconnect(*sessionSet):
+def loop_check_disconnect(chatRoomPool:dict):
     while True:
         t = time.time()
-        for i in sessionSet:
-            for j in i:
-                if t - i[j] > ChatUserPoolConf.timeout:
+        for key in chatRoomPool:
+            for j in chatRoomPool[key][0]:
+                if t - chatRoomPool[key][0][j] > ChatUserPoolConf.timeout:
                     j.close()
 
         time.sleep(ChatUserPoolConf.loolTime)
 
+# 客户端用户名非法
+class CustomCliNameError(Exception): pass
+
+# 客户端聊天室非法
+class CustomCliChatroomNumError(Exception): pass
 
 # 客户端声明断连
 class CustomCliMsgError(Exception): pass
@@ -46,17 +56,31 @@ class ChatUser:
             self.ip = request.META['HTTP_X_FORWARDED_FOR']
         else:
             self.ip = request.META['REMOTE_ADDR']
+
         self.level = 0
         self.speakTimes = 0
         self._levelTable = ChatUserConf.levelTable_speak
-
         self.request = request
         self.sock = self._get_wsgi_sock(request)
+
+        # check
+        self.roomNum = self._check_chatroom_num()
+        self.name = self._check_name(request.GET.get('name'))
 
         self.handshake()
 
     def __getattr__(self, item: str) -> None:
         return None
+
+    def _check_chatroom_num(self):
+        if self.request.get('roomNum'):
+            return self.request.get('roomNum')
+        raise CustomCliChatroomNumError
+
+    def _check_name(self, name):
+        code, msg = wordsFilterTool.deal(name, userInfo=self.ip)
+        if code: return name
+        raise CustomCliNameError
 
     def speak(self, words: str) -> tuple:
         self.speakTimes += 1
@@ -209,3 +233,34 @@ class ChatUser:
         except socket.error:
             self.sock.shutdown(2)
             self.sock.close()
+
+# 聊天室   {'编号':[[{套接字:最后活跃时间}},{}], 聊天缓存池]}
+class ChatRoomPool(dict):
+    def __init__(self, num: int) -> None:
+        for i in range(1, num + 1):
+            self.add(str(i))
+        super().__init__()
+
+    def add(self, key: str) -> None:
+        self[key] = [{}, wordsQueue()]
+
+    def _release(self, userPool: dict, chatPool: list) -> None:
+        tmpList = []
+        chatPool.clear()
+        for i in userPool:
+            tmpList.append(i)
+        for i in tmpList:
+            try:
+                del userPool[i]
+                i.close()
+            except:
+                print('这里释放有问题')
+
+    def clear(self, *keys: tuple) -> None:
+        if not keys:
+            keys = self.keys()
+
+        for key in keys:
+            self._release(*self[key])
+
+chatRoomPool = ChatRoomPool(ChatRoomPoolConf.roomNumber)

@@ -104,14 +104,15 @@
 <script src="https://cdn.bootcss.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
 <script>
     $(function () {
-        var wsurl = 'ws://120.79.56.46/chat/chat';
+        var wsurl = 'ws://127.0.0.1/chat/chat?roomNum=1&name=用户1';
         var websocket;
         var i = 0;
+        var dic = {'1':'123'};
         if (window.WebSocket) {
             websocket = new WebSocket(wsurl);
 
             //连接建立
-            websocket.onopen = function (evevt) {
+            websocket.onopen = function (event) {
                 console.log("Connected to WebSocket server.");
                 $('.show-area').append('<p class="bg-info message"><i class="glyphicon glyphicon-info-sign"></i>Connected to WebSocket server!</p>');
             }

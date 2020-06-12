@@ -3,21 +3,18 @@ import time
 import traceback
 
 from threading import Thread
-from collections import deque
 
 # Create your views here.
 from django.http import HttpResponse
 
 from libs import myLog
-from TIE.settings import WordsQueueConf
-from app_chatroom.models import ChatUser, CustomCliMsgError, loop_check_disconnect, CustomSerDisconnect
+from app_chatroom.models import ChatUser, CustomCliMsgError, loop_check_disconnect, CustomSerDisconnect, chatRoomPool, \
+    CustomCliNameError, CustomCliChatroomNumError, ChatRoomPool
 
-# TODO:多个聊天室后期实现，大概会做一个初次信息判定，初次判定时 用户资料（昵称和ip）会被整合至request请求
-# 用户池
-sessionSet = dict()
-wordsQueue = deque(maxlen=WordsQueueConf.maxLenth)
+# TODO:多个聊天室，需要有一个分发函数
 
-Thread(target=loop_check_disconnect, args=(sessionSet, )).start()
+
+Thread(target=loop_check_disconnect, args=(chatRoomPool, )).start()
 
 def _all_user_send(m: (str, bytes), q: dict) -> None:
     '''m:消息;q:用户池'''
@@ -34,14 +31,13 @@ def _all_user_send(m: (str, bytes), q: dict) -> None:
 
 # 加入
 def _join(obj: ChatUser) -> None:
-    msg = '%s 加入' % obj.ip
-    myLog.debug(msg)
-    msg = {"message": msg, "type": "system"}
+    msg = {"message": '%s 加入' % obj.ip, "type": "system", "time": time.time()}
+    _all_user_send(msg, chatRoomPool[obj.roomNum][0])
 
-    _all_user_send(msg, sessionSet)
+    myLog.debug(msg)
 
 # 发言
-def _speak(msg: (str, bytes)) -> None:
+def _speak(obj:ChatUser, msg: (str, bytes)) -> None:
     if msg:
         myLog.debug(msg)
 
@@ -50,57 +46,97 @@ def _speak(msg: (str, bytes)) -> None:
         try: msg = json.loads(msg)
         except: return
         msg['type'] = 'usermsg'
+        msg['time'] = time.time()
 
-        _all_user_send(json.dumps(msg), sessionSet)
+        _all_user_send(json.dumps(msg), chatRoomPool[obj.roomNum][0])
+        _add_to_cache(obj.roomNum, msg)
+
 
 # 离开
-def _leave(obj: ChatUser) -> None:
-    msg = '%s 离开' % obj.ip
+def _leave(obj: ChatUser, reason: Exception=None) -> None:
+    msg = {"message": '%s 离开' % (obj.ip), "type": "system", "time": time.time()}
+    _all_user_send(msg, chatRoomPool[obj.roomNum][0])
+
+    msg['message'] += '%s' % reason
     myLog.debug(msg)
 
-    msg = {"message": msg, "type": "system"}
-    _all_user_send(msg, sessionSet)
-
+# 添加缓冲池
+def _add_to_cache(roomNum: str, info: dict) -> None:
+    chatRoomPool[roomNum][1].append(info)
 
 # VIEWS
 
 def cli_accept(request) -> HttpResponse:
     '''客户端总处理函数'''
-    if request.META.get('HTTP_SEC_WEBSOCKET_VERSION') and request.META['HTTP_SEC_WEBSOCKET_VERSION'] == '13':
-        cliSocket = ChatUser(request)
-        # 加入
+    if request.META.get('HTTP_SEC_WEBSOCKET_VERSION') == '13':
+        try:
+            cliSocket = ChatUser(request)
+
+        except CustomCliChatroomNumError as e:
+            myLog.info(e)
+            return HttpResponse(b'NO')
+
+        except CustomCliNameError as e:
+            myLog.info(e)
+            return HttpResponse(b'NO')
+
+        except:
+            myLog.error('未捕捉错误, %s' % traceback.format_exc())
+            return HttpResponse(b'NO')
+
         _join(cliSocket)
-        sessionSet[cliSocket] = time.time()
+        chatRoomPool[cliSocket.roomNum][0][cliSocket] = time.time()
 
         try:
             while not cliSocket.can_read():
                 msg = cliSocket.read()
                 # 校验合法
                 if cliSocket.check_syntax(msg):
-                    _speak(msg)
+                    _speak(cliSocket, msg)
 
-        except CustomCliMsgError:       # 客户端主动断连
-            _leave(cliSocket)
-            del sessionSet[cliSocket]
-            myLog.debug(CustomCliMsgError)
+        except CustomCliMsgError as e:          # 客户端主动断连
+            _leave(cliSocket, e)
+            del chatRoomPool[cliSocket.roomNum][0][cliSocket]
 
-        except CustomSerDisconnect:     # 超时未发言强制断连
-            _leave(cliSocket)
-            del sessionSet[cliSocket]
+        except CustomSerDisconnect as e:        # 超时未发言强制断连
+            _leave(cliSocket,e)
+            del chatRoomPool[cliSocket.roomNum][0][cliSocket]
             myLog.debug(CustomSerDisconnect)
 
         except UnicodeDecodeError:
             myLog.warning(traceback.format_exc())
 
-        except:                         # 其他错误
-            myLog.error(traceback.format_exc())
+        except:                                 # 其他错误
+            myLog.error('未捕捉错误2, %s' % traceback.format_exc())
             _leave(cliSocket)
-            del sessionSet[cliSocket]
+            del chatRoomPool[cliSocket.roomNum][0][cliSocket]
 
+    return HttpResponse(b'FORCE EXIT')
 
-    return HttpResponse('FORCE EXIT')
+# 获取当前聊天室数
+def get_chatroom_num(request):
+    return HttpResponse(len(chatRoomPool))
+
+# 获取指定聊天室同时在线人数，如果不指定则返回所有在线人数
+def get_online_num(request):
+    roomNum = request.GET.get('roomNum')
+    if roomNum:
+        if roomNum in chatRoomPool:
+            return HttpResponse(len(chatRoomPool[roomNum][0]))
+        return HttpResponse(b'NOT EXIST')
+    num = 0
+    for n in chatRoomPool:
+        num += len(chatRoomPool[n][0])
+    return HttpResponse(num)
+
+# 获取缓存池
+def get_chat_cache(request):
+    roomNum = request.GET.get('roomNum')
+    if roomNum:
+        if roomNum in chatRoomPool:
+            return HttpResponse(json.dumps(chatRoomPool[roomNum][1]).encode())
 
 def test(request):
-    print(sessionSet)
+    print(chatRoomPool)
 
-    return HttpResponse("OK")
+    return HttpResponse(b"OK")
