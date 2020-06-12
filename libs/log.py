@@ -13,10 +13,10 @@ class Logger:
         '''w:写入文件;p:打印至控制台'''
         print('logger模块加载')
         self._loggerDict = {
-            'ERROR'  : (0, '\033[31mERROR\033[0m', 'ERROR'),
-            'WARNING': (1, '\033[33mWARNING\033[0m', 'WARNING'),
-            'INFO'   : (2, '\033[36mINFO\033[0m', 'INFO'),
-            'DEBUG'  : (3, '\033[32mDEBUG\033[0m', 'DEBUG'),
+            'ERROR'  : (0, '\033[31mERROR\033[0m'),
+            'WARNING': (1, '\033[33mWARNING\033[0m'),
+            'INFO'   : (2, '\033[36mINFO\033[0m'),
+            'DEBUG'  : (3, '\033[32mDEBUG\033[0m'),
         }
         self._levelNum = self._loggerDict[level][0]
         self._w = w
@@ -32,7 +32,7 @@ class Logger:
         if self._w:
             info = '%s [%s] %s %s -> line.%s:%s' % (
                 strftime('%Y-%m-%d %H:%M:%S'),   # 时间
-                self._loggerDict[level][2],      # 级别
+                self._loggerDict[level],         # 级别
                 currentThread(),                 # 线程号
                 _getframe(2).f_code.co_filename, # 所在函数
                 _getframe(2).f_lineno,           # 所在行
@@ -43,7 +43,7 @@ class Logger:
         if self._p:
             info = '%s [%s] %s %s -> line.%s:%s' % (
                 strftime('%Y-%m-%d %H:%M:%S'),   # 时间
-                self._loggerDict[level][1],      # 级别
+                level,                           # 级别
                 currentThread(),                 # 线程号
                 _getframe(2).f_code.co_filename, # 所在函数
                 _getframe(2).f_lineno,           # 所在行
