@@ -35,16 +35,12 @@ def _get_static(obj: ChatUser=None, msg=None) -> dict:
     }
     return d
 
-def _all_user_send(m: (str, bytes), q: dict) -> None:
+def _all_user_send(m: dict, q: dict) -> None:
     '''m:消息;q:用户池'''
     if not m or not q: return
 
     myLog.debug(m)
-    if isinstance(m, dict):
-        m = json.dumps(m)
-
-    if isinstance(m, str):
-        m = m.encode()
+    m = json.dumps(m).encode()
 
     for i in q:
         i.send(m)
@@ -65,7 +61,7 @@ def _speak(obj:ChatUser, msg: (str, bytes)) -> None:
     msg0 = _get_static(obj)
     msg0.update(msg)
 
-    _all_user_send(json.dumps(msg0), chatRoomPool[obj.roomNum][0])
+    _all_user_send(msg0, chatRoomPool[obj.roomNum][0])
     _add_to_cache(obj.roomNum, msg0)
     obj.speak_exp()
 
