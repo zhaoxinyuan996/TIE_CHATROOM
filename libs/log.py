@@ -64,12 +64,10 @@ class Logger:
         if self._levelNum >= 3:
             self._output('DEBUG', info)
 
-if 'win' in platform.system().lower():
-    LoggerSettings.writeFile = False
 
-myLog = Logger(LoggerSettings.level, w=LoggerSettings.writeFile)
+myLog = Logger(LoggerSettings.level, w=False if 'win' in platform.system().lower() else True)
 
 
 if __name__ == '__main__':
-    logger = Logger(LoggerSettings.level, w=False)
+    logger = Logger(LoggerSettings.level)
     logger.info('123')

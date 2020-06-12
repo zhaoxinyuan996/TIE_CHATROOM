@@ -28,7 +28,8 @@ class WordsFilterTool:
         :return: 是：消息； 否：违规消息
         '''
         if isinstance(words, bytes):
-            words = words.decode()
+            try: words = words.decode()
+            except: return False, '“%s”decode failed' % words
 
         for i in self._againstTuple:
             if i in words:

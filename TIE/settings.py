@@ -150,8 +150,6 @@ class LoggerSettings:
 
     level = DEBUG
 
-    writeFile = True
-
 # jwt配置
 class JWT:
     # 过期+秒数
@@ -162,6 +160,8 @@ class JWT:
 
 #用户配置
 class ChatUserConf:
+    legalSpeakTime = 1
+    legalWords = ('message', )
     levelTableS = (0, 10, 20, 40, 80, 160, 320, 640, 1280, 2560)
     levelTableU = (0, 1, 2, 4, 8, 160, 640, 128, 256)
 

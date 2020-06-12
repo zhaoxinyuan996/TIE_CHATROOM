@@ -7,9 +7,9 @@ from django.http import HttpResponse
 # Create your views here.
 
 from libs import myLog
+from TIE.settings import ChatUserConf
 from app_chatroom.models import ChatUser, CustomCliMsgError, loop_check_disconnect, CustomSerDisconnect, chatRoomPool, \
-    CustomCliNameError, CustomCliChatroomNumError
-
+    CustomCliNameError, CustomCliChatroomNumError, CustomHackMsgError
 
 # 目前参数
 #   type
@@ -35,6 +35,11 @@ def _get_static(obj: ChatUser=None, msg=None) -> dict:
     }
     return d
 
+def _check_msg_hack(msg: dict) -> None:
+    for i in msg:
+        if i not in ChatUserConf.legalWords:
+            raise CustomHackMsgError
+
 def _all_user_send(m: dict, q: dict) -> None:
     '''m:消息;q:用户池'''
     if not m or not q: return
@@ -51,20 +56,18 @@ def _join(obj: ChatUser) -> None:
     msg["message"] ='%s 加入' % obj.name
     _all_user_send(msg, chatRoomPool[obj.roomNum][0])
 
-def _speak(obj:ChatUser, msg: (str, bytes)) -> None:
+def _speak(obj:ChatUser, msg: bytes) -> None:
     '''发言，用户消息'''
-    if isinstance(msg, bytes):
-        msg = msg.decode()
+    msg = msg.decode()
     try: msg = json.loads(msg)
     except: return
 
+    # _check_msg_hack(msg)  # 调试时候放开检测， 这个前后端一定对齐，出错就断连
     msg0 = _get_static(obj)
     msg0.update(msg)
 
     _all_user_send(msg0, chatRoomPool[obj.roomNum][0])
     _add_to_cache(obj.roomNum, msg0)
-    obj.speak_exp()
-
 
 def _leave(obj: ChatUser, reason: Exception=None) -> None:
     '''离开，系统消息'''
@@ -99,7 +102,7 @@ def cli_accept(request) -> HttpResponse:
             return HttpResponse(b'UNKNOWN ERROR', status=403)
 
         _join(cliSocket)
-        chatRoomPool[cliSocket.roomNum][0][cliSocket] = time.time()
+        chatRoomPool[cliSocket.roomNum][0].append(cliSocket)
 
         try:
             while not cliSocket.can_read():
@@ -108,14 +111,19 @@ def cli_accept(request) -> HttpResponse:
                 if cliSocket.check_syntax(msg):
                     _speak(cliSocket, msg)
 
+        except CustomHackMsgError as e:             # 客户端尝试修改数据
+            _leave(cliSocket, e)
+            chatRoomPool[cliSocket.roomNum][0].remove(cliSocket)
+            myLog.warning(CustomCliMsgError)
+
         except CustomCliMsgError as e:              # 客户端主动断连
             _leave(cliSocket, e)
-            del chatRoomPool[cliSocket.roomNum][0][cliSocket]
+            chatRoomPool[cliSocket.roomNum][0].remove(cliSocket)
             myLog.debug(CustomCliMsgError)
 
         except CustomSerDisconnect as e:            # 超时未发言强制断连
             _leave(cliSocket,e)
-            del chatRoomPool[cliSocket.roomNum][0][cliSocket]
+            chatRoomPool[cliSocket.roomNum][0].remove(cliSocket)
             myLog.debug(CustomSerDisconnect)
 
         except UnicodeDecodeError:                  # 解码错误
@@ -124,16 +132,15 @@ def cli_accept(request) -> HttpResponse:
         except:                                     # 其他错误
             myLog.error('未捕捉错误2, %s' % traceback.format_exc())
             _leave(cliSocket)
-            del chatRoomPool[cliSocket.roomNum][0][cliSocket]
+            chatRoomPool[cliSocket.roomNum][0].remove(cliSocket)
 
     return HttpResponse(b'FORCE EXIT', status=403)
 
-
-def get_chatroom_num(request):
+def get_chatroom_num(request) -> HttpResponse:
     '''获取当前聊天室编号'''
     return HttpResponse(json.dumps(chatRoomPool.keys()))
 
-def get_online_num(request):
+def get_online_num(request) -> HttpResponse:
     '''获取指定聊天室同时在线人数，如果不指定则返回所有在线人数'''
     roomNum = request.GET.get('roomNum')
     if roomNum:
@@ -145,7 +152,7 @@ def get_online_num(request):
         num += len(chatRoomPool[n][0])
     return HttpResponse(json.dumps({'num': num}))
 
-def get_chat_cache(request):
+def get_chat_cache(request) -> HttpResponse:
     '''获取缓存池'''
     roomNum = request.GET.get('roomNum')
     if roomNum:
@@ -153,7 +160,7 @@ def get_chat_cache(request):
             return HttpResponse(json.dumps(list(chatRoomPool[roomNum][1])).encode())
     return HttpResponse(b"NONE", status=403)
 
-def test(request):
+def test(request) -> HttpResponse:
     print(chatRoomPool)
 
     return HttpResponse(b"OK")

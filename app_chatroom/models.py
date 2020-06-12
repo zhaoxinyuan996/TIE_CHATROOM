@@ -30,13 +30,19 @@ accept_header = (
 # 子线程定时踢出
 def loop_check_disconnect(chatRoomPool:dict):
     while True:
-        t = time.time()
-        for key in chatRoomPool:
-            for j in chatRoomPool[key][0]:
-                if t - chatRoomPool[key][0][j] > ChatUserPoolConf.timeout:
-                    j.close()
+        try:
+            t = time.time()
+            for key in chatRoomPool:
+                for j in chatRoomPool[key][0]:
+                    if t - j.last_avtive > ChatUserPoolConf.timeout:
+                        j.close()
 
-        time.sleep(ChatUserPoolConf.loolTime)
+            time.sleep(ChatUserPoolConf.loolTime)
+        except Exception as e:
+            myLog.error(e)
+
+# 客户端字段非法
+class CustomHackMsgError(BaseError): pass
 
 # 客户端用户名非法
 class CustomCliNameError(BaseError): pass
@@ -58,6 +64,7 @@ class ChatUser:
         self.lvU = 0
         self._sTimes = 0
         self._uTimes = 0
+        self.last_avtive = 0
         self._r = roomList
         self.request = request
         self.ip = self.get_ip(self.request)
@@ -85,12 +92,12 @@ class ChatUser:
             ip = request.META['REMOTE_ADDR']
         return ip
 
-    def _check_chatroom_num(self) -> (str, Exception):
+    def _check_chatroom_num(self) -> str:
         if self.request.GET.get('roomNum') in self._r:
             return self.request.GET.get('roomNum')
         raise CustomCliChatroomNumError
 
-    def _check_name(self, name: str) -> (str, Exception):
+    def _check_name(self, name: str) -> str:
         name = name.replace(' ', '')
         code, msg = wordsFilterTool.deal(name, userInfo=self.ip)
         if code: return name
@@ -161,12 +168,19 @@ class ChatUser:
         return _bytes
 
     def check_syntax(self, msg: bytes) -> bool:
-        if msg == b'\x03\xe9':
+        if msg == b'\x03\xe9':                                             # 断连信号
             raise CustomCliMsgError('%s 断连' % self.ip)
-        if b'Masked frame from server' in msg:
+
+        if b'Masked frame from server' in msg:                             # 忘了，解码出错
             return False
+
+        if time.time() - self.last_avtive < ChatUserConf.legalSpeakTime:  # 发言间隔太短
+            return False
+
         code, msg = wordsFilterTool.deal(msg, userInfo=self.ip)
         if code:
+            self.speak_exp()
+            self.last_avtive = time.time()
             return True
 
         msg = json.dumps({"message": msg, "type": "system"}).encode()
@@ -249,7 +263,7 @@ class ChatUser:
             self.sock.shutdown(2)
             self.sock.close()
 
-# 聊天室   {'编号':[[{套接字:最后活跃时间}},{}], [聊天缓存池]]}
+# 聊天室   {'编号':[[套接字1,套接字2], [聊天缓存池]]}
 class ChatRoomPool(dict):
     def __init__(self, num: int) -> None:
         for i in range(1, num + 1):
@@ -260,7 +274,7 @@ class ChatRoomPool(dict):
         return list(super().keys())
 
     def add(self, key: str) -> None:
-        self[key] = [{}, wordsQueue()]
+        self[key] = [[], wordsQueue()]
 
     def clear(self, *keys: tuple) -> None:
         if not keys:
@@ -269,16 +283,15 @@ class ChatRoomPool(dict):
         for key in keys:
             self._release(*self[key])
 
-    def _release(self, userPool: dict, chatPool: list) -> None:
-        tmpList = []
-        chatPool.clear()
-        for i in userPool:
-            tmpList.append(i)
-        for i in tmpList:
-            try:
-                del userPool[i]
-                i.close()
-            except:
-                print('这里释放有问题')
+    def _release(self, keys) -> None:
+        myLog.info('释放聊天室，key is %s' % keys)
+        for key in keys:
+            self[key][1].clear()
+        for key in keys:
+            for i in self[key][0]:
+                try:
+                    i.close()
+                except:
+                    print('这里释放有问题')
 
 chatRoomPool = ChatRoomPool(ChatRoomPoolConf.roomNumber)
