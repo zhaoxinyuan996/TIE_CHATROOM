@@ -16,14 +16,30 @@ from app_chatroom.models import ChatUser, CustomCliMsgError, loop_check_disconne
 #   message
 #   time
 #   name
+#   lvS
+#   lvU
 
-
+# 监控线程
 Thread(target=loop_check_disconnect, args=(chatRoomPool, )).start()
+
+def _get_static(obj: ChatUser=None, msg=None) -> dict:
+    '''字典参数模板'''
+    d = {
+        'time': time.time(),
+        'type': 'usermsg' if obj else 'system',
+        'name': obj.name if obj else '系统消息',
+        'lvS': obj.lvS if obj else '10',
+        'lvU': obj.lvU if obj else '10',
+
+        'message': msg,
+    }
+    return d
 
 def _all_user_send(m: (str, bytes), q: dict) -> None:
     '''m:消息;q:用户池'''
     if not m or not q: return
 
+    myLog.debug(m)
     if isinstance(m, dict):
         m = json.dumps(m)
 
@@ -34,36 +50,33 @@ def _all_user_send(m: (str, bytes), q: dict) -> None:
         i.send(m)
 
 def _join(obj: ChatUser) -> None:
-    '''加入'''
-    msg = {"message": '%s 加入' % obj.name, "type": "system", "time": time.time()}
+    '''加入，系统消息'''
+    msg = _get_static()
+    msg["message"] ='%s 加入' % obj.name
     _all_user_send(msg, chatRoomPool[obj.roomNum][0])
 
-    myLog.debug(msg)
-
 def _speak(obj:ChatUser, msg: (str, bytes)) -> None:
-    '''发言'''
-    if msg:
-        myLog.debug(msg)
+    '''发言，用户消息'''
+    if isinstance(msg, bytes):
+        msg = msg.decode()
+    try: msg = json.loads(msg)
+    except: return
 
-        if isinstance(msg, bytes):
-            msg = msg.decode()
-        try: msg = json.loads(msg)
-        except: return
-        msg['type'] = 'usermsg'
-        msg['name'] = obj.name
-        msg['time'] = time.time()
+    msg0 = _get_static(obj)
+    msg0.update(msg)
 
-        _all_user_send(json.dumps(msg), chatRoomPool[obj.roomNum][0])
-        _add_to_cache(obj.roomNum, msg)
-        obj.speak_exp()
+    _all_user_send(json.dumps(msg0), chatRoomPool[obj.roomNum][0])
+    _add_to_cache(obj.roomNum, msg0)
+    obj.speak_exp()
+
 
 def _leave(obj: ChatUser, reason: Exception=None) -> None:
-    '''离开'''
-    msg = {"message": '%s 离开' % (obj.name), "type": "system", "time": time.time()}
+    '''离开，系统消息'''
+    msg = _get_static()
+    msg["message"] = '%s 离开' % obj.name
     _all_user_send(msg, chatRoomPool[obj.roomNum][0])
 
     msg['message'] += '%s' % reason
-    myLog.debug(msg)
 
 def _add_to_cache(roomNum: str, info: dict) -> None:
     '''添加到缓存池'''

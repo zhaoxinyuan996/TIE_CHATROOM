@@ -12,6 +12,7 @@ import hashlib
 from collections import deque
 from functools import partial
 
+from libs import myLog
 from libs.cls import BaseError
 from tools.thesaurus import wordsFilterTool
 from TIE.settings import ChatUserConf, ChatUserPoolConf, ChatRoomPoolConf, WordsQueueConf
@@ -51,14 +52,17 @@ class CustomSerDisconnect(BaseError): pass
 
 # 聊天室用户类
 class ChatUser:
-    def __init__(self, request, roomList):
+    def __init__(self, request, roomList) -> None:
 
-        self.level = 0
-        self.speakTimes = 0
+        self.lvS = 0
+        self.lvU = 0
+        self._sTimes = 0
+        self._uTimes = 0
         self._r = roomList
         self.request = request
         self.ip = self.get_ip(self.request)
-        self._levelTable = ChatUserConf.levelTable_speak
+        self._levelTableS = ChatUserConf.levelTableS
+        self._levelTableU = ChatUserConf.levelTableU
         self.sock = self._get_wsgi_sock(request)
 
         # check
@@ -70,39 +74,37 @@ class ChatUser:
         del self._r
 
     def __getattr__(self, item: str) -> None:
+        myLog.error('attr "%s" not exist' % item)
         return None
 
     @staticmethod
-    def get_ip(request):
+    def get_ip(request) -> str:
         if 'HTTP_X_FORWARDED_FOR' in request.META:
             ip = request.META['HTTP_X_FORWARDED_FOR']
         else:
             ip = request.META['REMOTE_ADDR']
         return ip
 
-    # @staticmethod
-    # def get_ip(request):
-    #     if 'HTTP_X_FORWARDED_FOR' in request.META:
-    #         ip = request.META['HTTP_X_FORWARDED_FOR']
-    #     else:
-    #         ip = request.META['REMOTE_ADDR']
-    #     return ip
-
-    def _check_chatroom_num(self):
+    def _check_chatroom_num(self) -> (str, Exception):
         if self.request.GET.get('roomNum') in self._r:
             return self.request.GET.get('roomNum')
         raise CustomCliChatroomNumError
 
-    def _check_name(self, name: str):
+    def _check_name(self, name: str) -> (str, Exception):
         name = name.replace(' ', '')
         code, msg = wordsFilterTool.deal(name, userInfo=self.ip)
         if code: return name
         raise CustomCliNameError
 
     def speak_exp(self) -> None:
-        self.speakTimes += 1
-        if self.speakTimes in self._levelTable:
-            self.level = self._levelTable.index(self.speakTimes)
+        self._sTimes += 1
+        if self._sTimes in self._levelTableS:
+            self.lvS = self._levelTableS.index(self._sTimes)
+
+    def thumbs_up_exp(self) -> None:
+        self._uTimes += 1
+        if self._uTimes in self._levelTableU:
+            self.lvU = self._levelTableU.index(self._uTimes)
 
     def handshake(self) -> None:
         k = self._compute_accept_value(self.request.META['HTTP_SEC_WEBSOCKET_KEY'])
@@ -206,7 +208,7 @@ class ChatUser:
             data = self._mask_or_unmask(mask_key, data)
         return fin, opcode, data
 
-    def can_read(self, timeout=0.0):
+    def can_read(self, timeout=0.0) -> bool:
         r, w, e = [self.sock], [], []
         try:
             r, w, e = select.select(r, w, e, timeout)
