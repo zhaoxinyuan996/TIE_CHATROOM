@@ -43,8 +43,6 @@ def _check_msg_hack(msg: dict) -> None:
 def _all_user_send(m: dict, q: dict) -> None:
     '''m:消息;q:用户池'''
     if not m or not q: return
-
-    myLog.debug(m)
     m = json.dumps(m).encode()
 
     for i in q:
@@ -54,6 +52,7 @@ def _join(obj: ChatUser) -> None:
     '''加入，系统消息'''
     msg = _get_static()
     msg["message"] ='%s 加入' % obj.name
+    myLog.debug(msg)
     _all_user_send(msg, chatRoomPool[obj.roomNum][0])
 
 def _speak(obj:ChatUser, msg: bytes) -> None:
@@ -66,6 +65,7 @@ def _speak(obj:ChatUser, msg: bytes) -> None:
     msg0 = _get_static(obj)
     msg0.update(msg)
 
+    myLog.debug(msg)
     _all_user_send(msg0, chatRoomPool[obj.roomNum][0])
     _add_to_cache(obj.roomNum, msg0)
 
@@ -73,9 +73,8 @@ def _leave(obj: ChatUser, reason: Exception=None) -> None:
     '''离开，系统消息'''
     msg = _get_static()
     msg["message"] = '%s 离开' % obj.name
+    myLog.debug(msg)
     _all_user_send(msg, chatRoomPool[obj.roomNum][0])
-
-    msg['message'] += '%s' % reason
 
 def _add_to_cache(roomNum: str, info: dict) -> None:
     '''添加到缓存池'''
@@ -119,12 +118,12 @@ def cli_accept(request) -> HttpResponse:
         except CustomCliMsgError as e:              # 客户端主动断连
             _leave(cliSocket, e)
             chatRoomPool[cliSocket.roomNum][0].remove(cliSocket)
-            myLog.debug(CustomCliMsgError)
+            myLog.debug(e)
 
         except CustomSerDisconnect as e:            # 超时未发言强制断连
             _leave(cliSocket,e)
             chatRoomPool[cliSocket.roomNum][0].remove(cliSocket)
-            myLog.debug(CustomSerDisconnect)
+            myLog.debug(e)
 
         except UnicodeDecodeError:                  # 解码错误
             myLog.warning(traceback.format_exc())

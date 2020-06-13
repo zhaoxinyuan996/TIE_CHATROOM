@@ -98,8 +98,13 @@ class ChatUser:
         raise CustomCliChatroomNumError
 
     def _check_name(self, name: str) -> str:
+        # TODO 重名检测
+        if not name:
+            raise CustomCliNameError
+
         name = name.replace(' ', '')
         code, msg = wordsFilterTool.deal(name, userInfo=self.ip)
+
         if code: return name
         raise CustomCliNameError
 

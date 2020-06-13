@@ -172,7 +172,7 @@ class ChatRoomPoolConf:
 # 用户池配置
 class  ChatUserPoolConf:
     loolTime = 10
-    timeout = 30
+    timeout = 300
 
 # 缓冲池配置
 class WordsQueueConf:
