@@ -15,6 +15,8 @@ class Secret:
     print('Secret模块加载')
     dbPassWord = dbPassWord
     salt = salt
+    rUrl = rUrl
+    rHost = rHost
 
 if __name__ == '__main__':
 

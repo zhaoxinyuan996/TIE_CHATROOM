@@ -14,10 +14,10 @@ from functools import partial
 
 from libs import myLog
 from libs.cls import BaseError
-from tools.thesaurus import wordsFilterTool
+from tools.thesaurus import wordsFilterTool, hostFilterTool
 from TIE.settings import ChatUserConf, ChatUserPoolConf, ChatRoomPoolConf, WordsQueueConf
 
-wordsQueue = partial(deque,maxlen=WordsQueueConf.maxLenth)
+wordsQueue = partial(deque, maxlen=WordsQueueConf.maxLenth)
 
 accept_header = (
             "HTTP/1.1 101 Switching Protocols\r\n"
@@ -34,7 +34,7 @@ def loop_check_disconnect(chatRoomPool:dict):
             t = time.time()
             for key in chatRoomPool:
                 for j in chatRoomPool[key][0]:
-                    if t - j.last_avtive > ChatUserPoolConf.timeout:
+                    if t - j.lastAvtive > ChatUserPoolConf.timeout:
                         j.close()
 
             time.sleep(ChatUserPoolConf.loolTime)
@@ -47,6 +47,9 @@ class CustomHackMsgError(BaseError): pass
 # 客户端用户名非法
 class CustomCliNameError(BaseError): pass
 
+# 客户端名字重名
+class CustomCliNameSameError(BaseError): pass
+
 # 客户端聊天室非法
 class CustomCliChatroomNumError(BaseError): pass
 
@@ -58,15 +61,16 @@ class CustomSerDisconnect(BaseError): pass
 
 # 聊天室用户类
 class ChatUser:
-    def __init__(self, request, roomList) -> None:
+    def __init__(self, request, cPool) -> None:
 
         self.lvS = 0
         self.lvU = 0
         self._sTimes = 0
         self._uTimes = 0
-        self.last_avtive = 0
-        self._r = roomList
+        self.lastAvtive = 0
+        self._r = cPool.keys()
         self.request = request
+        self.chatPool = cPool
         self.ip = self.get_ip(self.request)
         self._levelTableS = ChatUserConf.levelTableS
         self._levelTableU = ChatUserConf.levelTableU
@@ -98,11 +102,14 @@ class ChatUser:
         raise CustomCliChatroomNumError
 
     def _check_name(self, name: str) -> str:
-        # TODO 重名检测
         if not name:
             raise CustomCliNameError
 
+        # 空间和时间哪个重要
         name = name.replace(' ', '')
+        if name not in [i.name for i in self.chatPool[self.roomNum]]:
+            raise CustomCliNameSameError
+
         code, msg = wordsFilterTool.deal(name, userInfo=self.ip)
 
         if code: return name
@@ -179,17 +186,24 @@ class ChatUser:
         if b'Masked frame from server' in msg:                             # 忘了，解码出错
             return False
 
-        if time.time() - self.last_avtive < ChatUserConf.legalSpeakTime:  # 发言间隔太短
+        if time.time() - self.lastAvtive < ChatUserConf.legalSpeakTime:    # 发言间隔太短
+            return False
+
+        code, msg = hostFilterTool.deal(msg, userInfo=self.ip)
+        if not code:                                                       # 包含url相关
+            self._write_frame(json.dumps({"message": msg, "type": "system"}).encode())
             return False
 
         code, msg = wordsFilterTool.deal(msg, userInfo=self.ip)
-        if code:
-            self.speak_exp()
-            self.last_avtive = time.time()
-            return True
+        if not code:                                                       # 包含违规词
+            self._write_frame(json.dumps({"message": msg, "type": "system"}).encode())
+            return False
 
-        msg = json.dumps({"message": msg, "type": "system"}).encode()
-        self._write_frame(msg)
+        self.speak_exp()
+        self.lastAvtive = time.time()
+        return True
+
+
 
     def send(self, words: bytes) -> None:
         self._write_frame(words)
@@ -300,3 +314,26 @@ class ChatRoomPool(dict):
                     print('这里释放有问题')
 
 chatRoomPool = ChatRoomPool(ChatRoomPoolConf.roomNumber)
+
+
+if __name__ == '__main__':
+
+    s = '''全面、及时的新闻报道，Google 新闻为您汇集来自世界各地的新闻来源。
+    国际新闻- BBC News 中文 - m › zhongwen › simp › world
+    国际新闻. 头条新闻. Keyframe #2. 视频. 视频. '''
+
+    def check(msg):
+        code, msg = hostFilterTool.deal(msg)
+        if not code:  #
+            return False
+
+        code, msg = wordsFilterTool.deal(msg)
+        if not code:  #
+            return False
+
+        return True
+
+    t = time.time()
+    for i in range(10000):
+        res = check(s)
+    print(time.time() - t)

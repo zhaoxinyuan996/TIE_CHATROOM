@@ -1,6 +1,8 @@
 import os
+import re
 from sys import _getframe
 
+from libs import Secret
 from libs.log import myLog
 
 
@@ -74,5 +76,33 @@ class SqlFilterTool:
                     return False
         return True
 
-wordsFilterTool = WordsFilterTool()
+
+# url/ip过滤器
+class HostFilterTool:
+    @staticmethod
+    def deal(words: (str, bytes), userInfo=None) -> tuple:
+        '''
+        :param words:    过滤前字符
+        :param userInfo: 用户信息，比如ip，用于输出违规日志
+        :return: 是：消息； 否：违规消息
+        '''
+        if isinstance(words, bytes):
+            try: words = words.decode()
+            except: return False, '“%s”decode failed' % words
+
+        res = re.search(Secret.rHost, words)
+        if res:
+                myLog.warning('user is %s words is "%s", against word "%s"' % (userInfo, words, res.group()))
+                return False, '"%s"疑似为网址！' % res.group()
+
+        res = re.search(Secret.rUrl, words)
+        if res:
+                myLog.warning('user is %s words is "%s", against word "%s"' % (userInfo, words, res.group()))
+                return False, '"%s"疑似为IP！' % res.group()
+
+        return True, words
+
+
 sqlFilterTool = SqlFilterTool()
+hostFilterTool = HostFilterTool()
+wordsFilterTool = WordsFilterTool()

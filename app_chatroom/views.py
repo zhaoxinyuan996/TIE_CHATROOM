@@ -9,7 +9,7 @@ from django.http import HttpResponse
 from libs import myLog
 from TIE.settings import ChatUserConf
 from app_chatroom.models import ChatUser, CustomCliMsgError, loop_check_disconnect, CustomSerDisconnect, chatRoomPool, \
-    CustomCliNameError, CustomCliChatroomNumError, CustomHackMsgError
+    CustomCliNameError, CustomCliChatroomNumError, CustomHackMsgError, CustomCliNameSameError
 
 # 目前参数
 #   type
@@ -69,7 +69,7 @@ def _speak(obj:ChatUser, msg: bytes) -> None:
     _all_user_send(msg0, chatRoomPool[obj.roomNum][0])
     _add_to_cache(obj.roomNum, msg0)
 
-def _leave(obj: ChatUser, reason: Exception=None) -> None:
+def _leave(obj: ChatUser) -> None:
     '''离开，系统消息'''
     msg = _get_static()
     msg["message"] = '%s 离开' % obj.name
@@ -86,11 +86,15 @@ def cli_accept(request) -> HttpResponse:
     '''客户端总处理函数'''
     if request.META.get('HTTP_SEC_WEBSOCKET_VERSION') == '13':
         try:
-            cliSocket = ChatUser(request, chatRoomPool.keys())
+            cliSocket = ChatUser(request, chatRoomPool)
 
         except CustomCliChatroomNumError as e:                  # 客户端聊天室选择非法
             myLog.warning('%s, %s' % (e, ChatUser.get_ip(request)))
             return HttpResponse(b'ROOM NUMBER ERROR', status=403)
+
+        except CustomCliNameSameError as e:                     # 客户端昵称重复
+            myLog.warning('%s, %s' % (e, ChatUser.get_ip(request)))
+            return HttpResponse(b'USERNAME ERROR', status=403)
 
         except CustomCliNameError as e:                         # 客户端昵称非法
             myLog.warning('%s, %s' % (e, ChatUser.get_ip(request)))
@@ -111,19 +115,19 @@ def cli_accept(request) -> HttpResponse:
                     _speak(cliSocket, msg)
 
         except CustomHackMsgError as e:             # 客户端尝试修改数据
-            _leave(cliSocket, e)
+            _leave(cliSocket)
             chatRoomPool[cliSocket.roomNum][0].remove(cliSocket)
-            myLog.warning(CustomCliMsgError)
+            myLog.warning('%s, %s:[%s]' % (e, cliSocket.ip, cliSocket.name))
 
         except CustomCliMsgError as e:              # 客户端主动断连
-            _leave(cliSocket, e)
+            _leave(cliSocket)
             chatRoomPool[cliSocket.roomNum][0].remove(cliSocket)
-            myLog.debug(e)
+            myLog.info('%s, %s:[%s]' % (e, cliSocket.ip, cliSocket.name))
 
         except CustomSerDisconnect as e:            # 超时未发言强制断连
-            _leave(cliSocket,e)
+            _leave(cliSocket)
             chatRoomPool[cliSocket.roomNum][0].remove(cliSocket)
-            myLog.debug(e)
+            myLog.info('%s, %s:[%s]' % (e, cliSocket.ip, cliSocket.name))
 
         except UnicodeDecodeError:                  # 解码错误
             myLog.warning(traceback.format_exc())
@@ -142,21 +146,27 @@ def get_chatroom_num(request) -> HttpResponse:
 def get_online_num(request) -> HttpResponse:
     '''获取指定聊天室同时在线人数，如果不指定则返回所有在线人数'''
     roomNum = request.GET.get('roomNum')
+
     if roomNum:
         if roomNum in chatRoomPool:
             return HttpResponse(len(chatRoomPool[roomNum][0]))
+
         return HttpResponse(b'NOT EXIST', status=403)
+
     num = 0
     for n in chatRoomPool:
         num += len(chatRoomPool[n][0])
+
     return HttpResponse(json.dumps({'num': num}))
 
 def get_chat_cache(request) -> HttpResponse:
     '''获取缓存池'''
     roomNum = request.GET.get('roomNum')
+
     if roomNum:
         if roomNum in chatRoomPool:
             return HttpResponse(json.dumps(list(chatRoomPool[roomNum][1])).encode())
+
     return HttpResponse(b"NONE", status=403)
 
 def test(request) -> HttpResponse:
