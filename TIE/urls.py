@@ -26,5 +26,6 @@ urlpatterns = [
     url('^favicon.ico$', RedirectView.as_view(url='static/img/favicon.ico')),
 
 
-    url('chat', include('app_chatroom.urls')),
+    url('^chat', include('app_chatroom.urls')),
+    url('^news', include('app_news.urls')),
 ]

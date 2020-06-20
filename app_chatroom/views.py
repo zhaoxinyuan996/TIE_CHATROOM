@@ -141,7 +141,11 @@ def cli_accept(request) -> HttpResponse:
 
 def get_chatroom_num(request) -> HttpResponse:
     '''获取当前聊天室编号'''
-    return HttpResponse(json.dumps(chatRoomPool.keys()))
+    return HttpResponse(json.dumps(
+        {'data':
+             chatRoomPool.keys()
+         }
+    ))
 
 def get_online_num(request) -> HttpResponse:
     '''获取指定聊天室同时在线人数，如果不指定则返回所有在线人数'''
@@ -157,7 +161,13 @@ def get_online_num(request) -> HttpResponse:
     for n in chatRoomPool:
         num += len(chatRoomPool[n][0])
 
-    return HttpResponse(json.dumps({'num': num}))
+    return HttpResponse(json.dumps(
+        {
+            'data':{
+                'num': num
+            }
+        }
+    ))
 
 def get_chat_cache(request) -> HttpResponse:
     '''获取缓存池'''
@@ -165,7 +175,11 @@ def get_chat_cache(request) -> HttpResponse:
 
     if roomNum:
         if roomNum in chatRoomPool:
-            return HttpResponse(json.dumps(list(chatRoomPool[roomNum][1])).encode())
+            return HttpResponse(json.dumps(
+                {
+                    'data':list(chatRoomPool[roomNum][1])
+                }
+            ))
 
     return HttpResponse(b"NONE", status=403)
 
