@@ -138,6 +138,8 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),]
 # # # # #  自定义配置  # # # # # # #
 ##################################
 
+dbPath = '/home/admin/db/tie.db'
+
 # 日志配置
 class LoggerSettings:
 

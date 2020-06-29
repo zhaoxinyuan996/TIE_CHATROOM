@@ -3,7 +3,8 @@ import sqlite3
 
 from collections import OrderedDict
 
-dbpath = '/home/admin/db/tie.db'
+from TIE.settings import dbPath
+
 
 def to_stamp(t: str) -> int:
     defaultTime = list(time.strftime('%Y%m%d%H%M'))
@@ -45,7 +46,7 @@ class SqliteDb():
         self.logger = logger if logger else FalseLogger()
 
     def __enter__(self) -> object:
-        self.db = sqlite3.connect(dbpath, isolation_level=None) # 自动事务
+        self.db = sqlite3.connect(dbPath, isolation_level=None) # 自动事务
         self.cursor = self.db.cursor()
         return self
 

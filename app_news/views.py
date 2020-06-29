@@ -1,41 +1,45 @@
-from django.http import HttpResponse
-
-
 # Create your views here.
 
-
 import json
+
+from math import ceil
+from django.http import HttpResponse
+
 from tools.news_tool import SqliteDb
 
 
 def page_num(request):
-    type = request.GET.get('type')
-    limit = request.GET.get('limit')
+    type = request.GET.get('type')          # str
+    limit = request.GET.get('limit')        # int
 
     if not type or not limit:
-        return HttpResponse(b'NOT EXIST', status=403)
+        return HttpResponse(b'FORCE EXIT', status=403)
 
-    eqWhe = {'type': type} if type != 'all' else {}
+    form = {}
+    limit = int(limit)
+    eqWhe = {} if type == 'all' else {'type': type}
+
     with SqliteDb() as db:
         code, res = db.base_r(sel='count("tittle")', eqWhe=eqWhe)
         if code:
-            form = {
-                'pageNum': res[0][0]
-            }
-            return HttpResponse(json.dumps(form).encode())
+            form['pageNum']: ceil(res[0][0] / limit)
+        else:
+            form['pageNum'] = res
 
-        return HttpResponse(str(res).encode())
-
+        return HttpResponse(json.dumps(form).encode())
 
 
 def page(request):
-    type = request.GET.get('type')
-    limit = int(request.GET.get('limit'))
-    pageNum = int(request.GET.get('pageNum'))
+    type = request.GET.get('type')          # str
+    limit = request.GET.get('limit')        # int
+    pageNum = request.GET.get('pageNum')    # int
 
     if not type or not limit or not pageNum:
-        return HttpResponse(b'NOT EXIST', status=403)
+        return HttpResponse(b'FORCE EXIT', status=403)
 
+    form = {'data': []}
+    limit = int(limit)
+    pageNum = int(pageNum)
     _min = limit * (pageNum - 1)
     limit = 'order by `time` limit %s,%s' % (_min, pageNum)
 
@@ -43,11 +47,10 @@ def page(request):
         eqWhe = {'type': type}
         code, res = db.base_r(eqWhe=eqWhe, suffix=limit)
         if code:
-            form = {'data': []}
             for i in res:
                 tittle, releaseTime, abstract, url, *purls = i
                 form['data'].append([tittle, releaseTime, abstract, url, purls])
+        else:
+            form['data'].append(res)
 
-                return HttpResponse(json.dumps(form).encode())
-
-        return HttpResponse(str(res).encode())
+        return HttpResponse(json.dumps(form).encode())
