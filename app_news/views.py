@@ -15,12 +15,12 @@ def page_num(request):
     if not type or not limit:
         return HttpResponse(b'NOT EXIST', status=403)
 
-    eqWhe = {'type': type}
+    eqWhe = {'type': type} if type != 'all' else {}
     with SqliteDb() as db:
         code, res = db.base_r(sel='count("tittle")', eqWhe=eqWhe)
         if code:
             form = {
-                'pageNum': res
+                'pageNum': res[0][0]
             }
             return HttpResponse(json.dumps(form).encode())
 
@@ -36,7 +36,7 @@ def page(request):
     if not type or not limit or not pageNum:
         return HttpResponse(b'NOT EXIST', status=403)
 
-    _min = limit * (pageNum - 1)
+    _min = limit * (int(pageNum) - 1)
     limit = 'order by `time` limit %s,%s' % (_min, pageNum)
 
     with SqliteDb() as db:
