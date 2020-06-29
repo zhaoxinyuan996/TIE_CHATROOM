@@ -24,7 +24,7 @@ def page_num(request):
             }
             return HttpResponse(json.dumps(form).encode())
 
-        return HttpResponse(res.encode())
+        return HttpResponse(str(res).encode())
 
 
 
@@ -50,4 +50,4 @@ def page(request):
 
                 return HttpResponse(json.dumps(form).encode())
 
-        return HttpResponse(res.encode())
+        return HttpResponse(str(res).encode())
