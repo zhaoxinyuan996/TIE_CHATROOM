@@ -30,13 +30,13 @@ def page_num(request):
 
 def page(request):
     type = request.GET.get('type')
-    limit = request.GET.get('limit')
-    pageNum = request.GET.get('pageNum')
+    limit = int(request.GET.get('limit'))
+    pageNum = int(request.GET.get('pageNum'))
 
     if not type or not limit or not pageNum:
         return HttpResponse(b'NOT EXIST', status=403)
 
-    _min = limit * (int(pageNum) - 1)
+    _min = limit * (pageNum - 1)
     limit = 'order by `time` limit %s,%s' % (_min, pageNum)
 
     with SqliteDb() as db:
