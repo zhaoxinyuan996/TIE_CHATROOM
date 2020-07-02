@@ -1,10 +1,9 @@
 import os
 import platform
 
-from sys import _getframe
 
 if 'win' in platform.system().lower():
-     with open(os.path.join(_getframe().f_code.co_filename, os.path.pardir, os.path.pardir, 'secret.txt'),
+     with open(os.path.join(os.path.dirname(__file__), os.path.pardir, 'secret.txt'),
                encoding='utf-8-sig') as f:
          exec(f.read())
 else:
