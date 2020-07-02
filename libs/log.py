@@ -32,7 +32,7 @@ class Logger:
         if self._w:
             info = '%s [%s] %s %s -> line.%s:%s' % (
                 strftime('%Y-%m-%d %H:%M:%S'),   # 时间
-                self._loggerDict[level],         # 级别
+                level,         # 级别
                 currentThread(),                 # 线程号
                 _getframe(2).f_code.co_filename, # 所在函数
                 _getframe(2).f_lineno,           # 所在行
@@ -43,7 +43,7 @@ class Logger:
         if self._p:
             info = '%s [%s] %s %s -> line.%s:%s' % (
                 strftime('%Y-%m-%d %H:%M:%S'),   # 时间
-                level,                           # 级别
+                self._loggerDict[level][1],      # 级别
                 currentThread(),                 # 线程号
                 _getframe(2).f_code.co_filename, # 所在函数
                 _getframe(2).f_lineno,           # 所在行
@@ -69,5 +69,7 @@ myLog = Logger(LoggerSettings.level, w=False if 'win' in platform.system().lower
 
 
 if __name__ == '__main__':
-    logger = Logger(LoggerSettings.level)
-    logger.info('123')
+    myLog.debug('123')
+    myLog.info('123')
+    myLog.warning('123')
+    myLog.error('123')
