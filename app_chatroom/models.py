@@ -107,7 +107,7 @@ class ChatUser:
 
         # 空间和时间哪个重要
         name = name.replace(' ', '')
-        if name not in [i.name for i in self.chatPool[self.roomNum][0]]:
+        if name in [i.name for i in self.chatPool[self.roomNum][0]]:
             raise CustomCliNameSameError
 
         code, msg = wordsFilterTool.deal(name, userInfo=self.ip)
