@@ -107,7 +107,7 @@ class ChatUser:
 
         # 空间和时间哪个重要
         name = name.replace(' ', '')
-        if name in [i.name for i in self.chatPool[self.roomNum][0]]:
+        if name in (i.name for i in self.chatPool[self.roomNum][0]):
             raise CustomCliNameSameError
 
         code, msg = wordsFilterTool.deal(name, userInfo=self.ip)
@@ -243,7 +243,7 @@ class ChatUser:
         return fin, opcode, data
 
     def can_read(self, timeout=0.0) -> bool:
-        r, w, e = [self.sock], [], []
+        r, w, e = (self.sock,), (), ()
         try:
             r, w, e = select.select(r, w, e, timeout)
         except select.error as err:

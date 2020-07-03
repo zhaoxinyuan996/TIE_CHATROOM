@@ -82,7 +82,7 @@ class SqliteDb():
     def base_r(self, sel:(str, list)=None, eqWhe: dict=None, customWhe: str=None, suffix:str=None) -> tuple:
         if sel:
             if isinstance(sel, list):
-                sel = ','.join([i for i in sel])
+                sel = ','.join((i for i in sel))
         else:
             sel = '*'
 
@@ -96,7 +96,7 @@ class SqliteDb():
 
         if customWhe:
             unequal_whe =' and '.join(
-                [i for i in (customWhe if isinstance(customWhe, list) else [customWhe])])
+                (i for i in (customWhe if isinstance(customWhe, list) else [customWhe])))
 
             sql += (' and ' + unequal_whe) if eqWhe else (' where ' + unequal_whe)
 
