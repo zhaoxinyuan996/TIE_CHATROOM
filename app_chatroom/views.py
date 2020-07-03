@@ -52,7 +52,7 @@ def _join(obj: ChatUser) -> None:
     '''加入，系统消息'''
     msg = _get_static()
     msg["message"] ='%s 加入' % obj.name
-    myLog.debug(msg)
+    myLog.info(msg)
     _all_user_send(msg, chatRoomPool[obj.roomNum][0])
 
 def _speak(obj:ChatUser, msg: bytes) -> None:
@@ -73,7 +73,7 @@ def _leave(obj: ChatUser) -> None:
     '''离开，系统消息'''
     msg = _get_static()
     msg["message"] = '%s 离开' % obj.name
-    myLog.debug(msg)
+    myLog.info(msg)
     _all_user_send(msg, chatRoomPool[obj.roomNum][0])
 
 def _add_to_cache(roomNum: str, info: dict) -> None:
@@ -93,7 +93,7 @@ def cli_accept(request) -> HttpResponse:
             return HttpResponse(b'ROOM NUMBER ERROR', status=403)
 
         except CustomCliNameSameError as e:                     # 客户端昵称重复
-            myLog.warning('%s, %s' % (e, ChatUser.get_ip(request)))
+            myLog.info('%s, %s' % (e, ChatUser.get_ip(request)))
             return HttpResponse(b'USERNAME ERROR', status=403)
 
         except CustomCliNameError as e:                         # 客户端昵称非法

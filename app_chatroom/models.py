@@ -157,6 +157,7 @@ class ChatUser:
                 raise ValueError('Socket not found in wsgi.input')
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         return sock
+
     @staticmethod
     def _mask_or_unmask(mask: bytes, data: bytes) -> (str, bytes):
         mask = array.array("B", mask)
@@ -248,8 +249,7 @@ class ChatUser:
         except select.error as err:
             if err.args[0] == 4:
                 return False
-            self.sock.shutdown(2)
-            self.sock.close()
+            self.close()
         return self.sock in r
 
     def _write_frame(self, data: bytes, fin=True, opcode=0x1) -> None:
@@ -279,8 +279,7 @@ class ChatUser:
         try:
             self.sock.sendall(frame)
         except socket.error:
-            self.sock.shutdown(2)
-            self.sock.close()
+            self.close()
 
 # 聊天室   {'编号':[[套接字1,套接字2], [聊天缓存池]]}
 class ChatRoomPool(dict):
@@ -289,7 +288,7 @@ class ChatRoomPool(dict):
             self.add(str(i))
         super().__init__()
 
-    def keys(self):
+    def keys(self) -> list:
         return list(super().keys())
 
     def add(self, key: str) -> None:
@@ -308,10 +307,8 @@ class ChatRoomPool(dict):
             self[key][1].clear()
         for key in keys:
             for i in self[key][0]:
-                try:
-                    i.close()
-                except:
-                    print('这里释放有问题')
+                try: i.close()
+                except: print('这里释放有问题')
 
 chatRoomPool = ChatRoomPool(ChatRoomPoolConf.roomNumber)
 

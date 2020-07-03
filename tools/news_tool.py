@@ -161,7 +161,7 @@ class SqliteDb():
         return self.execute('select * from news')
 
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-    def insert(self, type:str, tittle: str, time: str, abstract: str, url: str, *purls: tuple) -> tuple:
+    def insert(self, type: str, tittle: str, time: str, abstract: str, url: str, *purls: tuple) -> tuple:
         if 0 < len(purls) <= 3:
             d = OrderedDict(self.defaultColumn)
             d['type'] = type

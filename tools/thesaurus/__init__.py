@@ -68,12 +68,12 @@ class SqlFilterTool:
                               '>=',
                               '=')
 
-    def deal(self, *values: str) -> bool:
-        '''多个入参，通过返回True，不通过返回False'''
+    def deal(self, *values: str) -> (str, bool):
+        '''多个入参，通过返回True，不通过返回字段'''
         for i in self._againstTuple:
             for j in values:
                 if i in j:
-                    return False
+                    return j
         return True
 
 

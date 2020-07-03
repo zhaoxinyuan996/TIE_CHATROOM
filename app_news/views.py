@@ -5,7 +5,9 @@ import json
 from math import ceil
 from django.http import HttpResponse
 
+from libs import myLog
 from tools.news_tool import SqliteDb
+from tools.thesaurus import sqlFilterTool
 
 
 def page_num(request):
@@ -36,6 +38,11 @@ def page(request):
 
     if not type or not limit or not pageNum:
         return HttpResponse(b'FORCE EXIT', status=403)
+
+    code = sqlFilterTool.deal(limit, pageNum)
+    if not code:
+        myLog.warning('SQL注入，%s' % code)
+        return HttpResponse(b"SQL INJECTION", status=403)
 
     form = {'data': []}
     limit = int(limit)

@@ -2,7 +2,7 @@ import platform
 
 from time import strftime
 from sys import _getframe
-from threading import currentThread, Thread
+from threading import currentThread
 
 from TIE.settings import LoggerSettings
 
@@ -22,6 +22,15 @@ class Logger:
         self._w = w
         self._p = p
 
+    def __getattr__(self, item: str):
+        if item in ('error', 'warning', 'info', 'debug'):
+            item = item.upper()
+
+            if self._levelNum >= self._loggerDict[item][0]:
+                return lambda info: self._output(item, info)
+
+            return lambda info: None
+
     def _to_file(self, info: str) -> None:
         with open('%s%s.txt' % (LoggerSettings.logFilePath, strftime('%Y-%m-%d')), 'a') as f:
             f.write('%s\n' % info)
@@ -29,40 +38,23 @@ class Logger:
     def _output(self, level: str, info0: str) -> None:
         if isinstance(info0, bytes):
             info0 = info0.decode()
+
+        info0 = '%s [%s] %s %s -> line.%s:%s' % (
+            strftime('%Y-%m-%d %H:%M:%S'),      # 时间
+            '%s',                               # 级别
+            currentThread(),                    # 线程号
+            _getframe(2).f_code.co_filename,    # 所在函数
+            _getframe(2).f_lineno,              # 所在行
+            info0                               # 信息
+        )
         if self._w:
-            info = '%s [%s] %s %s -> line.%s:%s' % (
-                strftime('%Y-%m-%d %H:%M:%S'),   # 时间
-                level,         # 级别
-                currentThread(),                 # 线程号
-                _getframe(2).f_code.co_filename, # 所在函数
-                _getframe(2).f_lineno,           # 所在行
-                info0)
+            info = info0 % level
             self._to_file(info)
 
-
         if self._p:
-            info = '%s [%s] %s %s -> line.%s:%s' % (
-                strftime('%Y-%m-%d %H:%M:%S'),   # 时间
-                self._loggerDict[level][1],      # 级别
-                currentThread(),                 # 线程号
-                _getframe(2).f_code.co_filename, # 所在函数
-                _getframe(2).f_lineno,           # 所在行
-                info0)
+            info = info0 % self._loggerDict[level][1]
             print(info)
 
-
-    def error(self, info: (str, bytes)) -> None:
-        if self._levelNum >= 0:
-            self._output('ERROR', info)
-    def warning(self, info: (str, bytes)) -> None:
-        if self._levelNum >= 1:
-            self._output('WARNING', info)
-    def info(self, info: (str, bytes)) -> None:
-        if self._levelNum >= 2:
-            self._output('INFO', info)
-    def debug(self, info: (str, bytes)) -> None:
-        if self._levelNum >= 3:
-            self._output('DEBUG', info)
 
 
 myLog = Logger(LoggerSettings.level, w=False if 'win' in platform.system().lower() else True)
