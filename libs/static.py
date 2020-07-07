@@ -1,6 +1,9 @@
 contentTypeDic = {
-    'woff': 'application/octet-stream',
 
+    # 这个是客制化键值对
+    '/': 'text/html',
+
+    'woff': 'application/octet-stream',
     '*': 'application/octet-stream',
     'tif': 'application/x-tif',
     '001': 'application/x-001',
