@@ -164,6 +164,10 @@ dbPath = '/home/admin/db/tie.db'
 
 # 静态文件配置
 class StaticConf:
+    allowKey = (
+        # 'last-modified',
+    )
+    allowGzipDir = ('/', 'css', 'js')
     hostPath = os.path.join(os.path.dirname(__file__), os.pardir, 'static')
 
 # 日志配置
