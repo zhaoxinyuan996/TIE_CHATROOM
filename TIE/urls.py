@@ -18,13 +18,14 @@ from django.contrib import admin
 from django.conf.urls import url, include
 from django.views.generic.base import RedirectView
 
-from .views import test
+from .views import get_static
 
 urlpatterns = [
-    url(r'^$', test),
+    url(r'^$', get_static),
+    url(r'^static', get_static),
+
     url(r'^admin/', admin.site.urls),
     url('^favicon.ico$', RedirectView.as_view(url='static/img/favicon.ico')),
-
 
     url('^chat', include('app_chatroom.urls')),
     url('^news', include('app_news.urls')),

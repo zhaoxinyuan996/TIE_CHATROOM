@@ -131,8 +131,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),]
+STATIC_URL = '/这个傻逼django，真尼玛的臃肿/'
+# STATIC_URL = '/static/'
+# STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),]
 
 '''
 ┌───┐   ┌───┬───┬───┬───┐ ┌───┬───┬───┬───┐ ┌───┬───┬───┬───┐ ┌───┬───┬───┐ 
@@ -157,7 +158,13 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),]
 # # # # # #  自定义配置  # # # # # # #
 ####################################
 
+
+# 小型数据库配置
 dbPath = '/home/admin/db/tie.db'
+
+# 静态文件配置
+class StaticConf:
+    hostPath = os.path.join(os.path.dirname(__file__), os.pardir, 'static')
 
 # 日志配置
 class LoggerSettings:

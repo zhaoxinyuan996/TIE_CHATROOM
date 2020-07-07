@@ -190,6 +190,8 @@ class ChatUser:
         if time.time() - self.lastAvtive < ChatUserConf.legalSpeakTime:    # 发言间隔太短
             return False
 
+         # TODO 这里需要再加140字校验
+
         code, msg = hostFilterTool.deal(msg, userInfo=self.ip)
         if not code:                                                       # 包含url相关
             self._write_frame(json.dumps({"message": msg, "type": "system"}).encode())

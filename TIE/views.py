@@ -1,7 +1,6 @@
-from django.shortcuts import render
-from django.views.decorators.gzip import gzip_page
+from libs.cls import g, gzip_response
 
 
-@gzip_page
-def test(request):
-    return render(request, 'test.html')
+@gzip_response
+def get_static(request):
+    pass
