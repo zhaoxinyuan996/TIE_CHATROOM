@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh" style="height: 100%;">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title></title>
+	
+	<link rel="stylesheet" href="./static/layui/css/layui.css">
+	<link rel="stylesheet" href="./static/css/base.css">
+	<script src="./static/layui/layui.all.js"></script>
+	
+	
+
+</head>
+<body style="height: 100%;">
+	<!-- 导航栏 -->
+	<ul class="layui-nav" style="text-align: center;background-color: #26a69a;">
+		<li class="layui-nav-item" style="font-size: x-large; color: #F5FDC6;font-family: mFont;">Take It Easy</li>
+	<!-- 下面应该是弹窗 -->
+		<li class="layui-nav-item" style="float: right;"><a href="">关于我们</a></li>
+		<li class="layui-nav-item" style="float: right;"><a href="">用户须知</a></li>
+		<li class="layui-nav-item" style="float: right;"><a href="">最新公告</a></li>
+	</ul>
+	 
+	 <!-- 聊天区 -->
+	<div class="layui-container" style="height: calc(100% - 60px);">  
+		<div class="layui-row" style="height: 100%;">
+			<!-- 新闻板块 -->
+			<div class="layui-col-md3">
+				新闻板块
+			</div>
+			<!-- 聊天室 -->
+			<div class="layui-col-md6" style="height: 100%;">
+				<!-- 大框，包括输入昵称，选择聊天室，连接按钮 -->
+				<ul class="layui-nav" lay-filter="" style="background-color: #9F9F9F; height: 60px;">
+					<li class="layui-nav-item"><input type="text" name="" id="userName" value="你的昵称" /></input></li>
+					<li class="layui-nav-item">
+						<a href="javascript:;" id="chooseRoomBtn">选择聊天室</a>
+						<dl class="layui-nav-child">
+							<dd><a id="chooseRoomT">T-娱乐室</a></dd>
+							<dd><a id="chooseRoomI">I -数码室</a></dd>
+							<dd><a id="chooseRoomE">E-电竞室</a></dd>
+							<dd><a id="chooseRoomZ">Z-杂谈室</a></dd>
+						</dl>
+					</li>
+					<li class="layui-nav-item"><button type="button" class="layui-btn layui-btn-radius layui-btn-primary" id="connectBtn">连接</button></li>
+				</ul>
+				<!-- 聊天展示区 -->
+				<div id="chatShow" style="background-color: #C2C2C2; height: 60%; overflow-y: auto;">
+
+					
+				</div>
+				<!-- emoji表情之类的选择区和分割线 -->
+				<div style="background-color: #000000; height: calc(10% - 60px);">
+					
+				</div>
+				<!-- 聊天键入区 -->
+				<div style="background-color: #C2C2C2; height: 25%;">
+					<textarea id="input" style="width: 100%; height: 100%; resize: none;">内容</textarea>
+				</div>
+				<!-- 功能区 -->
+				<div style="background-color: #C2C2C2; height: 0%;">
+					<button type="button" id="sendBtn" class="layui-btn layui-btn-sm layui-btn-primary" style="float: right;">
+					  <i class="layui-icon">&#x1005;</i>发送
+					</button>
+					<button type="button" id="clearBtn" class="layui-btn layui-btn-sm layui-btn-primary" style="float: right;">
+					  <i class="layui-icon">&#x1006;</i>清空
+					</button>
+
+				</div>
+			</div>
+			<!-- 广告板块 -->
+			<div class="layui-col-md3">
+				广告板块
+			</div>
+		</div>
+
+	 </div>
+
+</body>
+	<script>
+		var lvSDict = {
+			0:'<i class="layui-icon" style="color: #FFECEC;">&#xe735;</i>',
+			1:'<i class="layui-icon" style="color: #FFD2D2;">&#xe735;</i>',
+			2:'<i class="layui-icon" style="color: #FFB5B5;">&#xe735;</i>',
+			3:'<i class="layui-icon" style="color: #FF9797;">&#xe735;</i>',
+			4:'<i class="layui-icon" style="color: #FF7575;">&#xe735;</i>',
+			5:'<i class="layui-icon" style="color: #FF5151;">&#xe735;</i>',
+			6:'<i class="layui-icon" style="color: #FF2D2D;">&#xe735;</i>',
+			7:'<i class="layui-icon" style="color: #FF0000;">&#xe735;</i>',
+			8:'<i class="layui-icon" style="color: #EA0000;">&#xe735;</i>',
+			9:'<i class="layui-icon" style="color: #CE0000;">&#xe735;</i>',
+			10:'<i class="layui-icon" style="color: #AE0000;">&#xe735;</i>'
+		};
+		// var LvUDict = {
+		// 	0:'<i class="layui-icon" style="color: #FFECEC;">&#xe735;</i>',
+		// 	1:'<i class="layui-icon" style="color: #FFD2D2;">&#xe735;</i>',
+		// 	2:'<i class="layui-icon" style="color: #FFB5B5;">&#xe735;</i>',
+		// 	3:'<i class="layui-icon" style="color: #FF9797;">&#xe735;</i>',
+		// 	4:'<i class="layui-icon" style="color: #FF7575;">&#xe735;</i>',
+		// 	5:'<i class="layui-icon" style="color: #FF5151;">&#xe735;</i>',
+		// 	6:'<i class="layui-icon" style="color: #FF2D2D;">&#xe735;</i>',
+		// 	7:'<i class="layui-icon" style="color: #FF0000;">&#xe735;</i>',
+		// 	8:'<i class="layui-icon" style="color: #EA0000;">&#xe735;</i>',
+		// 	9:'<i class="layui-icon" style="color: #CE0000;">&#xe735;</i>',
+		// 	10:'<i class="layui-icon" style="color: #AE0000;">&#xe735;</i>'
+		// };
+
+		var div = document.getElementById("chatShow");
+		var sTemplate1 = '<div><div><div style="background-color: #26a69a; border-radius:10px; margin: 2px 5px; padding: 8px; display:inline-block; *display:inline; *zoom:1;">'
+		// var sTemplate2 = '<i class="layui-icon">&#xe735;</i>'
+		// var sTemplate3 = '用户名：'
+		var sTemplate4 = '</div></div><div style="background-color: #26a69a; border-radius:10px; margin: 10px 50px; padding: 8px; display:inline-block; *display:inline; *zoom:1;">'
+		// var sTemplate5 = '说的话说'
+		var sTemplate6 = '</div></div>'
+		
+		var cTemplate1 = '<div style="overflow:hidden;"><div style="overflow:hidden;"><div style="background-color: #26a69a; border-radius:10px; margin: 2px 5px; padding: 8px; display:inline-block; *display:inline; *zoom:1; float: right;">'
+		// var cTemplate2 = '<i class="layui-icon">&#xe735;</i>'
+		// var cTemplate3 = '自己：'
+		var cTemplate4 = '</div></div><div style="background-color: #26a69a; border-radius:10px; margin: 10px 50px; padding: 8px; display:inline-block; *display:inline; *zoom:1; float: right;">'
+		// var cTemplate5 = '自己的话自己的话自'
+		var cTemplate6 = '</div></div>'
+
+		// 服务器消息类
+		function ServerChat(obj){
+			var allMsg = JSON.parse(obj);
+			var msgType = allMsg.type;
+			var msgMessage = allMsg.message;
+			var msgTime = allMsg.time;
+			var msgName = allMsg.name;
+			var msgLvS = allMsg.lvS;
+			var msgLvU = allMsg.lvU;
+			
+			var sTemplate2 = lvSDict[msgLvS];
+			var sTemplate3 = msgName;
+			var sTemplate5 = msgMessage;
+			
+			sTemplate = sTemplate1 + sTemplate2 + sTemplate3 + sTemplate4 + sTemplate5 + sTemplate6
+			div.innerHTML = div.innerHTML + sTemplate;
+		};
+		// 客户端消息类
+		function ClientChat(obj){
+			var allMsg = JSON.parse(obj);
+			var msgType = allMsg.type;
+			var msgMessage = allMsg.message;
+			var msgTime = allMsg.time;
+			var msgName = allMsg.name;
+			var msgLvS = allMsg.lvS;
+			var msgLvU = allMsg.lvU;
+			
+			var cTemplate2 = lvSDict[msgLvS];
+			var cTemplate3 = msgName;
+			var cTemplate5 = msgMessage;
+			
+			cTemplate = cTemplate1 + cTemplate2 + cTemplate3 + cTemplate4 + cTemplate5 + cTemplate6
+			div.innerHTML = div.innerHTML + cTemplate;
+		};
+		layui.use(['jquery'], function(){
+			var $ = jQuery = layui.$;
+			// 校验字段是否正确
+			function checkt_field(){
+				// 校验用户名
+				userName = $("#userName").val();
+				if(userName == ""){
+					alert("请输入用户名");
+					return false;
+				};	
+				// 校验已选聊天室
+				if(roomName == ""){
+					alert("请选择聊天室");
+					return false;
+				};
+				return true;
+			};
+			// 连接刷新元素函数
+			function connect(){
+				// 锁定昵称栏
+				$("#userName").css({
+					"cursor": "not-allowed",
+					"background": "none",
+					});
+				// 锁定聊天室选择器
+				$("#chooseRoomBtn").css({
+					"cursor": "not-allowed",
+					"background": "none",
+					});
+				$(".layui-nav-child").css("visibility", "hidden");
+				// 按钮变成断开
+				$("#connectBtn").html("断开");
+				connection = true;
+			};
+			// 断开刷新元素
+			function disconnect(){
+				// 锁定昵称栏
+				$("#userName").css({
+					"cursor": "",
+					"background": "",
+					});
+				// 锁定聊天室选择器
+				$("#chooseRoomBtn").css({
+					"cursor": "",
+					"background": "",
+					});
+				$(".layui-nav-child").css("visibility", "");
+				// 按钮变成断开
+				$("#connectBtn").html("连接");
+				connection = false;
+			};
+			
+			// 这里是选择聊天室
+			var roomName = ""
+			var userName = ""
+			var url = 'ws://120.79.56.46/chat/chat';
+			var connection = false;
+			$("#chooseRoomT").click(function(){
+				$("#chooseRoomBtn").text("娱乐室");
+				roomName = "t";
+			});
+			$("#chooseRoomI").click(function(){
+				$("#chooseRoomBtn").text("数码室");
+				roomName = "i";
+			});
+			$("#chooseRoomE").click(function(){
+				$("#chooseRoomBtn").text("电竞室");
+				roomName = "e";
+			});
+			$("#chooseRoomZ").click(function(){
+				$("#chooseRoomBtn").text("杂谈室");
+				roomName = "z";
+			});
+			// 这里是点击连接按钮 触发 连接，成功后锁定昵称栏，聊天室，按钮text设置成断开，断开时恢复
+			$("#connectBtn").click(function(){
+				// 判断连接状态
+				if ($("#connectBtn").html() == "连接"){
+					// 校验字段
+					if (checkt_field() != true){
+						return
+					};
+					// 连接websocket
+					websocket = new WebSocket(url + "?name=" + userName + "&roomName=" + roomName);
+					websocket.onopen = function (evevt) {
+						// 成功后触发函数
+						connect();
+					};
+					// 接收消息
+					websocket.onmessage = function (event) {
+						if(event.type == "system"){
+							ServerChat(event.data);
+						}else{
+						ClientChat(event.data);
+						};
+					};
+					// 发生错误
+					websocket.onerror = function (event) {
+						disconnect();
+						alert("连接失败了，我也不知道为啥")
+					};
+					// 连接关闭
+					websocket.onclose = function (event) {
+						disconnect();
+						alert("与服务器断开连接，请保持活跃哦~");
+					};
+				}else{
+					// 断开
+					// 断开这里有问题
+					disconnect();
+				};
+			});
+
+			// 清空按钮
+			$("#clearBtn").click(function(){
+				$("#input").val("");
+			});
+			// 发送按钮
+			$("#sendBtn").click(function(){
+				if(connection != true){
+					alert("请连接后发送")
+					return;
+				};
+				// 发送
+				websocket.send(JSON.stringify({"message":$("#input").val()}));
+				$("#input").val("");
+			});
+
+		});
+		//选择聊天室后设置成不可选，断链/时会重新选择
+		
+	</script>
+	<script>
+	//注意：导航 依赖 element 模块，否则无法进行功能性操作
+	layui.use('element', function(){
+		var element = layui.element;
+		element.init();
+	  //…
+	});
+	</script>
+</html>
+<!-- 断连有问题，应该强制断连，这个可以发送固定msg知会服务器，由服务器发起强制断连 -->

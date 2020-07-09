@@ -21,13 +21,13 @@ from django.views.generic.base import RedirectView
 from .views import get_static
 
 urlpatterns = [
-    url(r'^$', get_static),
-    url(r'\.html$', get_static),
-    url(r'^static', get_static),
+    # url(r'^$', get_static),
+    # url(r'\.html$', get_static),
+    url('', get_static),
 
     url(r'^admin/', admin.site.urls),
-    url('^favicon.ico$', RedirectView.as_view(url='static/img/favicon.ico')),
+    url(r'^favicon.ico$', RedirectView.as_view(url='static/img/favicon.ico')),
 
-    url('^chat', include('app_chatroom.urls')),
-    url('^news', include('app_news.urls')),
+    url(r'^chat', include('app_chatroom.urls')),
+    url(r'^news', include('app_news.urls')),
 ]

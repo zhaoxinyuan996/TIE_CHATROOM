@@ -69,7 +69,6 @@ def gzip_response(func):
     def f(*args):
         contentEncoding = args[0].META.get('HTTP_ACCEPT_ENCODING', '')
         fileUrl = args[0].META.get('PATH_INFO')
-
         if 'static' in fileUrl:
             fileUrl = fileUrl[8:]
 
