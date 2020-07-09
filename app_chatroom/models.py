@@ -318,7 +318,7 @@ class ChatRoomPool(dict):
                 try: i.close()
                 except: print('这里释放有问题')
 
-chatRoomPool = ChatRoomPool(ChatRoomPoolConf.roomNumber)
+chatRoomPool = ChatRoomPool(ChatRoomPoolConf.roomNames)
 
 
 if __name__ == '__main__':
