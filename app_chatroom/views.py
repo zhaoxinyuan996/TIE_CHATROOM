@@ -9,7 +9,7 @@ from django.http import HttpResponse
 from libs import myLog
 from TIE.settings import ChatUserConf
 from app_chatroom.models import ChatUser, CustomCliMsgError, loop_check_disconnect, CustomSerDisconnect, chatRoomPool, \
-    CustomCliNameError, CustomCliChatroomNumError, CustomHackMsgError, CustomCliNameSameError
+    CustomCliNameError, CustomCliChatroomNameError, CustomHackMsgError, CustomCliNameSameError
 
 # 目前参数
 #   type
@@ -89,7 +89,7 @@ def cli_accept(request) -> HttpResponse:
         try:
             cliSocket = ChatUser(request, chatRoomPool)
 
-        except CustomCliChatroomNumError as e:                  # 客户端聊天室选择非法
+        except CustomCliChatroomNameError as e:                  # 客户端聊天室选择非法
             myLog.warning('%s, %s' % (e, ChatUser.get_ip(request)))
             return HttpResponse(b'ROOM NUMBER ERROR', status=403)
 

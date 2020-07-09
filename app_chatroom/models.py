@@ -54,7 +54,7 @@ class CustomUserOverLimit(BaseError): pass
 class CustomCliNameSameError(BaseError): pass
 
 # 客户端聊天室非法
-class CustomCliChatroomNumError(BaseError): pass
+class CustomCliChatroomNameError(BaseError): pass
 
 # 客户端声明断连
 class CustomCliMsgError(BaseError): pass
@@ -100,9 +100,9 @@ class ChatUser:
         return ip
 
     def _check_chatroom_num(self) -> str:
-        if self.request.GET.get('roomNum') in self._r:
-            return self.request.GET.get('roomNum')
-        raise CustomCliChatroomNumError
+        if self.request.GET.get('roomName') in self._r:
+            return self.request.GET.get('roomName')
+        raise CustomCliChatroomNameError
 
     def _check_name(self, name: str) -> str:
         if not name:
