@@ -10,7 +10,6 @@ from libs.log import myLog
 class WordsFilterTool:
     def __init__(self) -> None:
         '''加载违规词库到self._againstTuple'''
-        print('WordsFilterTool模块加载')
         _tmpList = []
         _existfile = ('反动词库.txt', '暴恐词库.txt')
 
@@ -22,6 +21,7 @@ class WordsFilterTool:
 
         self._againstTuple = tuple(_tmpList)
         del _tmpList, _existfile
+        print('WordsFilterTool模块加载')
 
     def deal(self, words: (str, bytes), userInfo=None) -> tuple:
         '''
@@ -43,7 +43,6 @@ class WordsFilterTool:
 # SQL注入过滤器
 class SqlFilterTool:
     def __init__(self) -> None:
-        print('SqlFilterTool模块加载')
         self._againstTuple = ("select",
                               "insert",
                               "delete",
@@ -63,10 +62,9 @@ class SqlFilterTool:
                               "where",
 
                               '<',
-                              '<=',
                               '>',
-                              '>=',
                               '=')
+        print('SqlFilterTool模块加载')
 
     def deal(self, *values: str) -> (str, bool):
         '''多个入参，通过返回True，不通过返回字段'''

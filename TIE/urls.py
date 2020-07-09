@@ -22,6 +22,7 @@ from .views import get_static
 
 urlpatterns = [
     url(r'^$', get_static),
+    url(r'\.html$', get_static),
     url(r'^static', get_static),
 
     url(r'^admin/', admin.site.urls),

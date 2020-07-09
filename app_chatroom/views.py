@@ -45,6 +45,7 @@ def _all_user_send(m: dict, q: dict) -> None:
     if not m or not q: return
     m = json.dumps(m).encode()
 
+    # TODO 这里捕捉报错大概应该要优化一下
     for i in q:
         i.send(m)
 

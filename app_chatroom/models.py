@@ -47,6 +47,9 @@ class CustomHackMsgError(BaseError): pass
 # 客户端用户名非法
 class CustomCliNameError(BaseError): pass
 
+# 聊天室人数已满
+class CustomUserOverLimit(BaseError): pass
+
 # 客户端名字重名
 class CustomCliNameSameError(BaseError): pass
 
@@ -80,7 +83,7 @@ class ChatUser:
         self.roomNum = self._check_chatroom_num()
         self.name = self._check_name(request.GET.get('name'))
 
-        self.handshake()
+        self._handshake()
 
         del self._r
 
@@ -105,6 +108,9 @@ class ChatUser:
         if not name:
             raise CustomCliNameError
 
+        if len(self.chatPool[self.roomNum][0]) >= ChatRoomPoolConf.userNumLimit:
+            raise CustomUserOverLimit
+
         # 空间和时间哪个重要
         name = name.replace(' ', '')
         if name in (i.name for i in self.chatPool[self.roomNum][0]):
@@ -125,7 +131,7 @@ class ChatUser:
         if self._uTimes in self._levelTableU:
             self.lvU = self._levelTableU.index(self._uTimes)
 
-    def handshake(self) -> None:
+    def _handshake(self) -> None:
         k = self._compute_accept_value(self.request.META['HTTP_SEC_WEBSOCKET_KEY'])
         s = accept_header % k.decode()
         self.sock.send(s.encode())
@@ -285,9 +291,9 @@ class ChatUser:
 
 # 聊天室   {'编号':[[套接字1,套接字2], [聊天缓存池]]}
 class ChatRoomPool(dict):
-    def __init__(self, num: int) -> None:
-        for i in range(1, num + 1):
-            self.add(str(i))
+    def __init__(self, cName: tuple) -> None:
+        for i in cName:
+            self.add(i)
         super().__init__()
 
     def keys(self) -> list:

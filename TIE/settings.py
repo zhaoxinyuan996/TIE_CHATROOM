@@ -167,7 +167,7 @@ class StaticConf:
     allowKey = (
         # 'last-modified',
     )
-    allowGzipDir = ('/', 'css', 'js')
+    hostHtml = 'index.html'
     hostPath = os.path.join(os.path.dirname(__file__), os.pardir, 'static')
 
 # 日志配置
@@ -199,7 +199,8 @@ class ChatUserConf:
 
 # 聊天室配置
 class ChatRoomPoolConf:
-    roomNumber = 1
+    roomNames = ('t', 'i', 'e', 'z')
+    userNumLimit = 100
 
 # 用户池配置
 class  ChatUserPoolConf:

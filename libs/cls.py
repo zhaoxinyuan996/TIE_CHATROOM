@@ -27,7 +27,7 @@ class StaticFile:
         print('StaticFile模块加载')
 
     @staticmethod
-    def last_file_time(mtime):
+    def last_file_time(mtime: float) -> str:
         t = datetime.fromtimestamp(mtime)
         t = t.strftime('%a, %d %b %Y %H:%M:%S GMT')
         return t
@@ -43,7 +43,10 @@ class StaticFile:
         relativePath = os.path.abspath(absfile)[self.replaceLen:].replace('\\', '/')
         # 这里限制了根目录只能有一个非文件夹型文件
         if '/' not in relativePath:
-            relativePath = '/'
+            if relativePath == 'index.html':
+                relativePath = '/'
+            else:
+                relativePath = '/' + relativePath
 
         with open(absfile, 'rb') as f:
             res = f.read()
@@ -75,7 +78,7 @@ def gzip_response(func):
 
         contentType = contentTypeDic.get(fileUrl.split('.')[-1], '*/*')
 
-        if 'gzip' in contentEncoding and fileUrl.startswith(StaticConf.allowGzipDir):
+        if 'gzip' in contentEncoding:
             response = HttpResponse(g.fileDict[fileUrl][1], content_type=contentType)
             response._headers['Content-Encoding'] = ('Content-Encoding', 'gzip')
 
@@ -89,5 +92,6 @@ def gzip_response(func):
     return f
 
 g = StaticFile()
-
+for i in g.fileDict:
+    print(i)
 
