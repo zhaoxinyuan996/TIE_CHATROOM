@@ -70,7 +70,7 @@ class ChatUser:
         self.lvU = 0
         self._sTimes = 0
         self._uTimes = 0
-        self.lastAvtive = 0
+        self.lastAvtive = time.time()
         self._r = cPool.keys()
         self.request = request
         self.chatPool = cPool
@@ -106,7 +106,7 @@ class ChatUser:
 
     def _check_name(self, name: str) -> str:
         if not name:
-            raise CustomCliNameError
+            raise CustomCliNameError('name is None')
 
         if len(self.chatPool[self.roomNum][0]) >= ChatRoomPoolConf.userNumLimit:
             raise CustomUserOverLimit
@@ -119,7 +119,7 @@ class ChatUser:
         code, msg = wordsFilterTool.deal(name, userInfo=self.ip)
 
         if code: return name
-        raise CustomCliNameError
+        raise CustomCliNameError(msg)
 
     def speak_exp(self) -> None:
         self._sTimes += 1
