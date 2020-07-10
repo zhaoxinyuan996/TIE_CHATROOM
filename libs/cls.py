@@ -21,7 +21,7 @@ class BaseError(Exception):
 class StaticFile:
     def __init__(self):
         self.rootPath = StaticConf.hostPath
-        self.replaceLen = len(os.path.abspath(self.rootPath)) + 1
+        self.replaceLen = os.path.abspath(os.path.join(self.rootPath, os.pardir)).__len__()
         self.fileDict = {}
         self.deal_file(self.rootPath)
         print('StaticFile模块加载')
@@ -41,12 +41,9 @@ class StaticFile:
 
     def write_cache(self, absfile: str, modifytime: float) -> None:
         relativePath = os.path.abspath(absfile)[self.replaceLen:].replace('\\', '/')
-        # 这里限制了根目录只能有一个非文件夹型文件
-        if '/' not in relativePath:
-            if relativePath == 'index.html':
-                relativePath = '/'
-            else:
-                relativePath = '/' + relativePath
+
+        if relativePath.endswith('html'):
+            relativePath = relativePath.replace('/static/', '')
 
         with open(absfile, 'rb') as f:
             res = f.read()
@@ -69,8 +66,6 @@ def gzip_response(func):
     def f(*args):
         contentEncoding = args[0].META.get('HTTP_ACCEPT_ENCODING', '')
         fileUrl = args[0].META.get('PATH_INFO')
-        if 'static' in fileUrl:
-            fileUrl = fileUrl[8:]
 
         if fileUrl not in g.fileDict:
             return HttpResponse('STATICFILE NOT EXIST', status=404)
@@ -91,6 +86,5 @@ def gzip_response(func):
     return f
 
 g = StaticFile()
-for i in g.fileDict:
-    print(i)
+
 
