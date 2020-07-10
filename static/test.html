@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title></title>
+	<link rel="stylesheet" type="text/css" href="test.css"/>
+	<link rel="stylesheet" href="../static/layui/css/layui.css">
+	<script src="../static/layui/layui.all.js"></script>
+</head>
+<body>
+
+	 
+	 
+<script>
+	layui.use(['jquery'], function(){
+		var $ = jQuery = layui.$;
+
+		});
+	layui.use('layer', function(){
+	  var layer = layui.layer;
+	  
+	//单个使用
+	layer.open({
+		skin: 'demo-class',
+		type: 2,					// 声明弹出方式为iframe
+		content: 'chatroom.html',	// 弹出的html文件
+		area: ['50%', '80%'],		// 弹出的宽高
+		closeBtn: 0,				// 没有关闭按钮
+		maxmin: true,				// 支持最大最小化
+		
+		success: function(layero){
+			// 删掉最大化按钮
+			layero.find('.layui-layer-max').remove();
+		},
+	});
+
+	//全局使用。即所有弹出层都默认采用，但是单个配置skin的优先级更高
+	layer.config({
+		skin: 'demo-class',
+	});
+	});
+
+
+</script>
+</body>
+</html>

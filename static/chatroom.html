@@ -1,86 +1,59 @@
 <!DOCTYPE html>
-<html lang="zh" style="height: 100%;">
+<html lang="zh">
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta http-equiv="X-UA-Compatible" content="ie=edge">
 	<title></title>
-	
 	<link rel="stylesheet" href="../static/layui/css/layui.css">
 	<link rel="stylesheet" href="../static/css/base.css">
 	<script src="../static/layui/layui.all.js"></script>
-	
-	
-
 </head>
-<body style="height: 100%;">
-	<!-- 导航栏 -->
-	<ul class="layui-nav" style="text-align: center;background-color: #26a69a;">
-		<li class="layui-nav-item" style="font-size: x-large; color: #F5FDC6;font-family: mFont;">Take It Easy</li>
-	<!-- 下面应该是弹窗 -->
-		<li class="layui-nav-item" style="float: right;"><a href="">关于我们</a></li>
-		<li class="layui-nav-item" style="float: right;"><a href="">用户须知</a></li>
-		<li class="layui-nav-item" style="float: right;"><a href="">最新公告</a></li>
-	</ul>
-	 
-	 <!-- 聊天区 -->
-	<div class="layui-container" style="height: calc(100% - 60px);">  
-		<div class="layui-row" style="height: 100%;">
-			<!-- 新闻板块 -->
-			<div class="layui-col-md3">
-				新闻板块
+<body>
+	<div class="layui-container">
+		<div class="" style="height: 100%; margin: 0 auto;">
+			<!-- 大框，包括输入昵称，选择聊天室，连接按钮 -->
+			<ul class="layui-nav" lay-filter="" style="background-color: #9F9F9F; height: 60px;">
+				<li class="layui-nav-item"><input type="text" name="" id="userName" value="你的昵称" /></input></li>
+				<li class="layui-nav-item">
+					<a href="javascript:;" id="chooseRoomBtn">选择聊天室</a>
+					<dl class="layui-nav-child">
+						<dd><a id="chooseRoomT">T-娱乐室</a></dd>
+						<dd><a id="chooseRoomI">I -数码室</a></dd>
+						<dd><a id="chooseRoomE">E-电竞室</a></dd>
+						<dd><a id="chooseRoomZ">Z-杂谈室</a></dd>
+					</dl>
+				</li>
+		
+				<li class="layui-nav-item"><button type="button" class="layui-btn layui-btn-radius layui-btn-primary" id="connectBtn">连接</button></li>
+			</ul>
+			<!-- 聊天展示区 -->
+			<div id="chatShow" style="background-color: #C2C2C2; height: 60%; overflow-y: auto;">
+		
+				
 			</div>
-			<!-- 聊天室 -->
-			<div class="layui-col-md6" style="height: 100%;">
-				<!-- 大框，包括输入昵称，选择聊天室，连接按钮 -->
-				<ul class="layui-nav" lay-filter="" style="background-color: #9F9F9F; height: 60px;">
-					<li class="layui-nav-item"><input type="text" name="" id="userName" value="你的昵称" /></input></li>
-					<li class="layui-nav-item">
-						<a href="javascript:;" id="chooseRoomBtn">选择聊天室</a>
-						<dl class="layui-nav-child">
-							<dd><a id="chooseRoomT">T-娱乐室</a></dd>
-							<dd><a id="chooseRoomI">I -数码室</a></dd>
-							<dd><a id="chooseRoomE">E-电竞室</a></dd>
-							<dd><a id="chooseRoomZ">Z-杂谈室</a></dd>
-						</dl>
-					</li>
-
-					<li class="layui-nav-item"><button type="button" class="layui-btn layui-btn-radius layui-btn-primary" id="connectBtn">连接</button></li>
-				</ul>
-				<!-- 聊天展示区 -->
-				<div id="chatShow" style="background-color: #C2C2C2; height: 60%; overflow-y: auto;">
-
-					
-				</div>
-				<!-- emoji表情之类的选择区和分割线 -->
-				<div style="background-color: #000000; height: calc(10% - 60px);">
-					
-				</div>
-				<!-- 聊天键入区 -->
-				<div style="background-color: #C2C2C2; height: 25%;">
-					<textarea id="input" style="width: 100%; height: 100%; resize: none;">内容</textarea>
-				</div>
-				<!-- 功能区 -->
-				<div style="background-color: #C2C2C2; height: 0%;">
-					<button type="button" id="sendBtn" class="layui-btn layui-btn-sm layui-btn-primary" style="float: right;">
-					  <i class="layui-icon">&#x1005;</i>发送
-					</button>
-					<button type="button" id="clearBtn" class="layui-btn layui-btn-sm layui-btn-primary" style="float: right;">
-					  <i class="layui-icon">&#x1006;</i>清空
-					</button>
-
-				</div>
+			<!-- emoji表情之类的选择区和分割线 -->
+			<div style="background-color: #000000; height: calc(10% - 60px);">
+				
 			</div>
-			<!-- 广告板块 -->
-			<div class="layui-col-md3">
-				广告板块
+			<!-- 聊天键入区 -->
+			<div style="background-color: #C2C2C2; height: 25%;">
+				<textarea id="input" style="width: 100%; height: 100%; resize: none;">内容</textarea>
+			</div>
+			<!-- 功能区 -->
+			<div style="background-color: #C2C2C2; height: 0%;">
+				<button type="button" id="sendBtn" class="layui-btn layui-btn-sm layui-btn-primary" style="float: right;">
+				  <i class="layui-icon">&#x1005;</i>发送
+				</button>
+				<button type="button" id="clearBtn" class="layui-btn layui-btn-sm layui-btn-primary" style="float: right;">
+				  <i class="layui-icon">&#x1006;</i>清空
+				</button>
+		
 			</div>
 		</div>
-
-	 </div>
-
+	</div>
 </body>
-	<script>
+<script>
 		var lvSDict = {
 			0:'<i class="layui-icon" style="color: #FFECEC;">&#xe735;</i>',
 			1:'<i class="layui-icon" style="color: #FFD2D2;">&#xe735;</i>',
@@ -290,10 +263,5 @@
 		element.init();
 	});
 
-	layui.use('layer', function(){
-		var layer = layui.layer;
-		layer.msg('hello');
-	});
 	</script>
 </html>
-<!-- 断连有问题，断连逻辑应该重写，如果本地主动断连，就不弹窗 -->
