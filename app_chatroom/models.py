@@ -187,7 +187,7 @@ class ChatUser:
         return _bytes
 
     def check_syntax(self, msg: bytes) -> bool:
-        if msg == b'\x03\xe9':                                             # 断连信号
+        if msg == b'\x03\xe9' or msg == b'\\x03\\xe9':                                             # 断连信号
             raise CustomCliMsgError('%s 断连' % self.ip)
 
         if b'Masked frame from server' in msg:                             # 忘了，解码出错
