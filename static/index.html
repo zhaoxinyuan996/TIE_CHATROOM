@@ -9,6 +9,7 @@
 	<link rel="stylesheet" href="../static/layui/css/layui.css">
 	<link rel="stylesheet" href="../static/css/base.css">
 	<script src="../static/layui/layui.all.js"></script>
+	<script src="../static/layui/lay/modules/layer.js"></script>
 	
 	
 
@@ -27,20 +28,26 @@
 
 </body>
 	<script>
+		// px转换小数字
+		function toNum(percent){
+				var num=Number(percent.replace("px", ''));;
+		        return num;
+		    }
 	//注意：导航 依赖 element 模块，否则无法进行功能性操作
 	layui.use("element", function(){
 		var element = layui.element;
 		element.init();
 	});
-	layui.use(["jquery", "layer"], function(){
+	layui.use(["jquery"], function(){
 		var $ = jQuery = layui.$;
 		var layer = layui.layer;
 	  
-	
 	window.onload = function(){
+		// 指定top left
+
 		//单个使用
 		var openChatroom = layer.open({
-			title: ["take it easy", "font-size:18px;"],
+			title: ["T I E", "font-size:18px;"],
 			anim: 5,
 			skin: "demo-class",
 			type: 2,					// 声明弹出方式为iframe
@@ -49,21 +56,42 @@
 			closeBtn: 0,				// 没有关闭按钮
 			maxmin: true,				// 支持最大最小化
 			success: function(layero){
-				// layero.find(".layui-layer-max").hide();
+				layero.find(".layui-layer-max").hide();
 			},
 			full: function(layero) {
 					layer.restore(openChatroom);
 				},
 			min: function(layero){
 				layero.find(".layui-layer-max").show();
-				return;
+				// 这个只能 上和左才生效
+				// var aa = document.getElementsByClassName("layui-layer-title")[0].style;
+				// console.log(aa);
+
+				var boxWidth = 180;
+				var boxHeight = 40;
+				var seeWidth = document.body.clientWidth;
+				var seeHeight = document.body.clientHeight;
+				console.log(seeWidth);
+				console.log(boxWidth);
+				$(".layui-layer").css({"top": seeHeight - boxHeight});
+				$(".layui-layer").css({"left": seeWidth - boxWidth});
+				console.log()
 				
 			},
 			restore: function(layero){
+				// 隐藏最大化按钮
 				layero.find(".layui-layer-max").hide();
+				// 重新计算宽高保证居中
+				var height = document.querySelector(".layui-layer").style.height;
+				var width = document.querySelector(".layui-layer").style.width;
+				var seeHeight = document.body.clientHeight;
+				var seeWidth = document.body.clientWidth;
+
+				$(".layui-layer").css({"top": (seeHeight - toNum(height)) * 0.5});
+				$(".layui-layer").css({"left": (seeWidth - toNum(width)) * 0.5});
 			},
 		});
-		layer.min(openChatroom);
+		// layer.min(openChatroom);
 
 		
 	};
