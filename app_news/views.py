@@ -24,7 +24,7 @@ def page_num(request):
     with SqliteDb() as db:
         code, res = db.base_r(sel='count("tittle")', eqWhe=eqWhe)
         if code:
-            form['pageNum']: ceil(res[0][0] / limit)
+            form['pageNum'] = ceil(res[0][0] / limit)
         else:
             form['pageNum'] = res
 
