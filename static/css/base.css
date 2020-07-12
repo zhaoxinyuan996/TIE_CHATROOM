@@ -154,7 +154,8 @@ html {
 }
 
 body {
-    min-width: 1024px;
+	/* 这里设置最小宽度 ，这个先注掉，因为这个会导致最小化坐标计算出错*/
+    /* min-width: 1024px; */
     min-height: 100%;
     background-color: #fff;
 }

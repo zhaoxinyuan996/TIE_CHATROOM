@@ -15,24 +15,58 @@
 
 </head>
 <body style="height: 100%;">
-	<!-- 导航栏 -->
+		<!-- 导航栏 -->
 	<ul class="layui-nav" style="text-align: center;background-color: #26a69a;">
 		<li class="layui-nav-item" style="font-size: x-large; color: #F5FDC6;font-family: mFont;">Take It Easy</li>
-	<!-- 下面应该是弹窗 -->
-		<li class="layui-nav-item" style="float: right;"><a href="">关于我们</a></li>
-		<li class="layui-nav-item" style="float: right;"><a href="">用户须知</a></li>
-		<li class="layui-nav-item" style="float: right;"><a href="">最新公告</a></li>
+		<!-- 下面应该是弹窗 -->
+		<!-- TODO 这个可以用弹出层，如果没bug的话 -->
+		<li class="layui-nav-item" style="float: right;"><a>关于我们</a></li>
+		<li class="layui-nav-item" style="float: right;"><a>用户须知</a></li>
+		<li class="layui-nav-item" style="float: right;"><a>最新公告</a></li>
 	</ul>
 	 
 	
 
 </body>
-	<script>
-		// px转换小数字
-		function toNum(percent){
-				var num=Number(percent.replace("px", ''));;
-		        return num;
-		    }
+<script>
+	autoWidthRate = 0.4;
+	autoHeightRate = 0.8;
+	boxWidth = 180;
+	boxHeight = 40;
+	// px转换小数字
+	function toNum(percent){
+			var num=Number(percent.replace("px", ''));;
+			return num;
+		};
+	function min($){
+		// 这个只能 上和左才生效
+		var seeWidth = document.body.scrollWidth;
+		var seeHeight = document.body.clientHeight;
+		
+		$(".layui-layer").css({"min-width": boxWidth});
+		$(".layui-layer").css({"left": seeWidth - boxWidth});
+		$(".layui-layer").css({"top": seeHeight - boxHeight});
+		
+		$("#layui-layer-shade100001").hide();
+		
+		iframeSize = "min";
+	};
+	function restore($){
+		// 隐藏最大化按钮
+		$(".layui-layer").css({"min-width": 400});
+		// 重新计算宽高保证居中 iframe本身的宽度有问题，没有自适应
+		var width = document.querySelector(".layui-layer").style.width;
+		var height = document.querySelector(".layui-layer").style.height;
+		var seeWidth = document.body.scrollWidth;
+		var seeHeight = document.body.scrollHeight;
+		
+		$(".layui-layer").css({"left": (seeWidth - toNum(width)) * 0.5});
+		$(".layui-layer").css({"top": (seeHeight - toNum(height)) * 0.5});
+		
+		$("#layui-layer-shade100001").show();
+		
+		iframeSize = "max";
+	};
 	//注意：导航 依赖 element 模块，否则无法进行功能性操作
 	layui.use("element", function(){
 		var element = layui.element;
@@ -41,60 +75,73 @@
 	layui.use(["jquery"], function(){
 		var $ = jQuery = layui.$;
 		var layer = layui.layer;
-	  
-	window.onload = function(){
-		// 指定top left
-
-		//单个使用
-		var openChatroom = layer.open({
-			title: ["T I E", "font-size:18px;"],
-			anim: 5,
-			skin: "demo-class",
-			type: 2,					// 声明弹出方式为iframe
-			content: ["chatroom.html", "no"],	// 弹出的html文件
-			area: ["40%", "80%"],		// 弹出的宽高
-			closeBtn: 0,				// 没有关闭按钮
-			maxmin: true,				// 支持最大最小化
-			success: function(layero){
-				layero.find(".layui-layer-max").hide();
-			},
-			full: function(layero) {
-					layer.restore(openChatroom);
-				},
-			min: function(layero){
-				layero.find(".layui-layer-max").show();
-				// 这个只能 上和左才生效
-				// var aa = document.getElementsByClassName("layui-layer-title")[0].style;
-				// console.log(aa);
-
-				var boxWidth = 180;
-				var boxHeight = 40;
-				var seeWidth = document.body.clientWidth;
-				var seeHeight = document.body.clientHeight;
-				console.log(seeWidth);
-				console.log(boxWidth);
-				$(".layui-layer").css({"top": seeHeight - boxHeight});
-				$(".layui-layer").css({"left": seeWidth - boxWidth});
-				console.log()
-				
-			},
-			restore: function(layero){
-				// 隐藏最大化按钮
-				layero.find(".layui-layer-max").hide();
-				// 重新计算宽高保证居中
-				var height = document.querySelector(".layui-layer").style.height;
-				var width = document.querySelector(".layui-layer").style.width;
-				var seeHeight = document.body.clientHeight;
-				var seeWidth = document.body.clientWidth;
-
-				$(".layui-layer").css({"top": (seeHeight - toNum(height)) * 0.5});
-				$(".layui-layer").css({"left": (seeWidth - toNum(width)) * 0.5});
-			},
-		});
-		// layer.min(openChatroom);
-
 		
-	};
+		// 改变窗口大小
+		window.onresize = function(){
+			resize($);
+		};
+		function resize($){
+			var seeWidth = document.body.scrollWidth;
+			var seeHeight = document.body.scrollHeight;
+			if(iframeSize == "max"){
+				// 弹窗大小
+				var width = seeWidth * autoWidthRate;
+				var height = seeHeight * autoHeightRate;
+				$(".layui-layer").css("width", width);
+				$(".layui-layer").css("height", height);
+				// 悬浮位置
+				if (width <= 400){width = 400};
+				$(".layui-layer").css({"left": (seeWidth - width) * 0.5});
+				$(".layui-layer").css({"top": (seeHeight - height) * 0.5});
+				// 页面大小改变后iframe页面也要调整高度
+				var tittleHeight = toNum($(".layui-layer-title").css("height"));
+				$("#layui-layer-iframe100001").css("height", height - tittleHeight);
+				// 跨域设置子页面高度
+				// $("#layui-layer-iframe100001").contents().find("#sendBtn").hide();
+			}else if(iframeSize == "min"){
+				
+				$(".layui-layer").css({"min-width": boxWidth});
+				$(".layui-layer").css({"left": seeWidth - boxWidth});
+				$(".layui-layer").css({"top": seeHeight - boxHeight});
+			};
+		};
+		window.onload = function(){
+			//单个使用
+			var openChatroom = layer.open({
+				title: ["T I E", "font-size:18px;"],
+				anim: 5,							// 动画 渐显
+				skin: "layui-layer-molv",			// 弹窗主题风格
+				type: 2,							// 声明弹出方式为iframe
+				content: ["chatroom.html", "no"],	// 弹出的html文件
+				area: ["40%", "80%"],				// 弹出的宽高
+				closeBtn: 0,						// 没有关闭按钮
+				maxmin: true,						// 支持最大最小化
+				shadeClose: true,
+				success: function(layero){
+					layero.find(".layui-layer-max").hide();
+					$(".layui-layer").css("overflow", "hidden");
+					$(".layui-layer").css({"min-width": 400});
+				},
+				full: function(layero) {
+						layer.restore(openChatroom);
+					},
+				min: function(layero){
+					layero.find(".layui-layer-max").show();
+					min($);
+
+					
+				},
+				restore: function(layero){
+					layero.find(".layui-layer-max").hide();
+					restore($);
+					resize($);
+					
+				},
+				
+			});
+			// layer.min(openChatroom);
+			
+		};
 	
 	// layer.full(openChatroom);
 	
@@ -103,6 +150,6 @@
 	// 	skin: "demo-class",
 	// });
 	});
-	</script>
+</script>
 </html>
 <!-- 断连有问题，断连逻辑应该重写，如果本地主动断连，就不弹窗 -->

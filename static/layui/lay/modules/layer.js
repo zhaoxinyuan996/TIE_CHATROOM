@@ -437,7 +437,11 @@ function(e, t) {
         n.find("." + l[7]).on("click", e),
         a.shadeClose && i("#layui-layer-shade" + t.index).on("click",
         function() {
-            r.close(t.index)
+			// 这里是遮罩层相关，应该点击外部区域就最小化
+            // r.min(t.index);
+			var e = a.min && a.min(n);
+			e === !1 || r.min(t.index, a)
+			
         }),
         n.find(".layui-layer-min").on("click",
         function() {

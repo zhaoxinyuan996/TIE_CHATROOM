@@ -1,17 +1,19 @@
 <!DOCTYPE html>
-<html lang="zh" style="height: 100%; width: 10%;">
+<html lang="zh" style="height: 100%">
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta http-equiv="X-UA-Compatible" content="ie=edge">
 	<title></title>
 	<link rel="stylesheet" href="../static/layui/css/layui.css">
-	<link rel="stylesheet" href="../static/css/base.css">
 	<script src="../static/layui/layui.all.js"></script>
+<!-- 	<script src="../static/layui/lay/modules/jquery.js"></script>
+	<script src="../static/layui/lay/modules/element.js"></script> -->
+	<script src="../static/layui/lay/modules/layedit.js"></script>
 </head>
-<body style="height: 100%;">
-	<div class="" style="height: 100%;">
-		<div class="" style="height: 100%; margin: 0 auto;">
+<body style="height: 100%">
+	<div class="" style="height: 100%; width: 100%;">
+		<div class="" style="height: calc(75% - 30px);">
 			<!-- 大框，包括输入昵称，选择聊天室，连接按钮 -->
 			<ul class="layui-nav" lay-filter="" style="background-color: #9F9F9F; height: 60px;">
 				<li class="layui-nav-item"><input type="text" name="" id="userName" value="你的昵称" /></input></li>
@@ -28,20 +30,18 @@
 				<li class="layui-nav-item"><button type="button" class="layui-btn layui-btn-radius layui-btn-primary" id="connectBtn">连接</button></li>
 			</ul>
 			<!-- 聊天展示区 -->
-			<div id="chatShow" style="background-color: #C2C2C2; height: 60%; overflow-y: auto;">
+			<div id="chatShow" style="background-color: #C2C2C2; height: 100%; overflow-y: auto;">
 		
 				
 			</div>
-			<!-- emoji表情之类的选择区和分割线 -->
-			<div style="background-color: #000000; height: calc(10% - 60px);">
 				
 			</div>
 			<!-- 聊天键入区 -->
-			<div style="background-color: #C2C2C2; height: 25%;">
-				<textarea id="input" style="width: 100%; height: 100%; resize: none;">内容</textarea>
+			<div style="background-color: #C2C2C2; height: 25%; overflow:hidden;">
+				<textarea id="input" style="width: 100%; height: 100%; resize: none; box-sizing: border-box;">内容</textarea>
 			</div>
 			<!-- 功能区 -->
-			<div style="background-color: #C2C2C2; height: 10%; width: 75%;">
+			<div style="background-color: #C2C2C2; height: 0%; width: 100%;">
 				<button type="button" id="sendBtn" class="layui-btn layui-btn-sm layui-btn-primary" style="float: right;">
 				  <i class="layui-icon">&#x1005;</i>发送
 				</button>
@@ -54,6 +54,10 @@
 	</div>
 </body>
 <script>
+	window.onload = function(){
+		var seeWidth = document.body.clientWidth;
+		var seeHeight = document.body.clientHeight;
+	};
 	var lvSDict = {
 		0:'<i class="layui-icon" style="color: #FFECEC;">&#xe735;</i>',
 		1:'<i class="layui-icon" style="color: #FFD2D2;">&#xe735;</i>',
@@ -97,6 +101,7 @@
 	var cTemplate6 = '</div></div>'
 
 	// 接收消息类
+	// TODO 这里的系统消息可以换个样式 要不占位了
 	function RecChat(obj, userName){
 		var allMsg = JSON.parse(obj.data);
 		var msgType = allMsg.type;
@@ -122,7 +127,7 @@
 		div.scrollTop = div.scrollHeight;
 	};
 	layui.use(['jquery'], function(){
-		var $ = jQuery = layui.$;
+		$ = jQuery = layui.$;
 		// 校验字段是否正确
 		function checkt_field(){
 			// 校验用户名
@@ -177,7 +182,7 @@
 		var roomName = ""
 		var userName = ""
 		var url = 'ws://120.79.56.46/chat/chat';
-		var connection = false;
+		connection = false;
 		$("#chooseRoomT").click(function(){
 			$("#chooseRoomBtn").text("娱乐室");
 			roomName = "t";
@@ -214,6 +219,7 @@
 					};
 				// 发生错误
 				websocket.onerror = function (event) {
+					// TODO 各种报错逻辑要捕捉
 					if(connection == true){
 						disconnect();
 						alert("连接失败了，我也不知道为啥");
@@ -234,35 +240,49 @@
 			};
 		});
 
-		// 清空按钮
+	});
+</script>
+<script>
+	//注意：导航 依赖 element 模块，否则无法进行功能性操作
+	layui.use('element', function(){
+		var element = layui.element;
+		element.init();
+	});
+	layui.use('layedit', function(){
+		var layedit = layui.layedit;
+		var editIndex = layedit.build(
+		  "input", {
+				"tool": [
+					'face'	//表情
+				],
+				"height": "100%"
+				}
+		);		//建立编辑器
+		
+		 // 清空按钮
 		$("#clearBtn").click(function(){
-			$("#input").val("");
-		});
-		// 发送按钮
+			// $("#input").val("");
+			layedit.clear(editIndex);
+		 });
+		 // 发送按钮
 		$("#sendBtn").click(function(){
 			if(connection != true){
 				alert("请连接后发送")
 				return;
 			};
 			// 发送
-			if($("#input").val() == ""){
+			if(layedit.getText(editIndex) == ""){
 				return
 			}else{
-				websocket.send(JSON.stringify({"message":$("#input").val()}));
-				$("#input").val("");
+				websocket.send(JSON.stringify({"message":layedit.getText(editIndex)}));
+				layedit.clear(editIndex);
 			}
 		});
+		var ff = function(){
+			console.log('这里f');
+		};
+		// enterPress(ff);
 
 	});
-	//选择聊天室后设置成不可选，断链/时会重新选择
-		
-	</script>
-	<script>
-	//注意：导航 依赖 element 模块，否则无法进行功能性操作
-	layui.use('element', function(){
-		var element = layui.element;
-		element.init();
-	});
-
-	</script>
+</script>
 </html>
