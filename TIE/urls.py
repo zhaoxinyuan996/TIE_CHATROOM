@@ -18,10 +18,11 @@ from django.contrib import admin
 from django.conf.urls import url, include
 from django.views.generic.base import RedirectView
 
-from .views import get_static, get_html
+from .views import get_static, get_index, get_chatroom
 
 urlpatterns = [
-    url(r'^$', get_html),
+    url(r'^$', get_index),
+    url(r'^chatroom.html$', get_chatroom),
     url(r'^static', get_static),
 
     url(r'^admin/', admin.site.urls),
