@@ -56,6 +56,12 @@ function(t) {
         var e = u(t);
         if (e[0]) return d(e[0].document.body.innerHTML)
     },
+	c.prototype.newLine = function(t) {
+	    var i = u(t);
+		var e = u(t);
+		e[0].document.body.innerHTML += "<div>哈哈</div>";
+		console.log(d(e[0].document.body.innerHTML));
+	},
 	c.prototype.clear = function(t) {
 	    var i = u(t);
 	    if (i[0]) e(i[0].document.body).text("")
@@ -99,7 +105,7 @@ function(t) {
                 "min-height": a.height
             }).html(i.value || ""),
 			// 屏蔽富文本自带的回车绑定
-            y.apply(l, [r, n, i, a]),
+            // y.apply(l, [r, n, i, a]),
             g.call(l, r, t, a)
         })
     },
@@ -125,6 +131,7 @@ function(t) {
         c.on("keydown",
         function(t) {
 			var e = t.keyCode;
+			r.execCommand("formatBlock", !1, "<p>")
 			// 回车键触发发送按钮点击事件
 			if (13 === e) {
 				t.preventDefault();

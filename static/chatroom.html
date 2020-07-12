@@ -6,10 +6,10 @@
 	<meta http-equiv="X-UA-Compatible" content="ie=edge">
 	<title></title>
 	<link rel="stylesheet" href="../static/layui/css/layui.css">
-	<script src="../static/layui/layui.all.js"></script>
-<!-- 	<script src="../static/layui/lay/modules/jquery.js"></script>
-	<script src="../static/layui/lay/modules/element.js"></script> -->
+	<script src="../static/layui/layui.js"></script>
+	<script src="../static/layui/lay/modules/element.js"></script>
 	<script src="../static/layui/lay/modules/layedit.js"></script>
+	<script src="../static/layui/lay/modules/jquery.js"></script>
 </head>
 <body style="height: 100%">
 	<div class="" style="height: 100%; width: 100%;">
@@ -57,6 +57,12 @@
 	window.onload = function(){
 		var seeWidth = document.body.clientWidth;
 		var seeHeight = document.body.clientHeight;
+		
+		document.body.onkeydown = function (event) {
+			if(event.keyCode == "13"){
+				return false;
+			};
+		}
 	};
 	var lvSDict = {
 		0:'<i class="layui-icon" style="color: #FFECEC;">&#xe735;</i>',
@@ -278,9 +284,32 @@
 				layedit.clear(editIndex);
 			}
 		});
-		var ff = function(){
-			console.log('这里f');
+		function setFocus(el) {
+		    el = el[0]; // jquery 对象转dom对象  
+		    el.focus();
+		    var range = document.createRange();
+		    range.selectNodeContents(el);
+		    range.collapse(false);
+		    var sel = window.getSelection();
+			sel.removeAllRanges();
+			sel.addRange(range);
+			console.log($("#LAY_layedit_1")[0].contentWindow.document);
+			range.setStart($("#LAY_layedit_1")[0].contentWindow.document, 2);
+			console.log(range);
 		};
+		// 这个给跪了，解决在子iframe中键盘事件监听不到的bug
+		$($("#LAY_layedit_1")[0].contentWindow.document).keydown(function(event){
+			if(event.ctrlKey && event.keyCode == "13"){
+				layedit.newLine(editIndex);
+				setFocus($("#LAY_layedit_1"));
+				// console.log(layedit.getContent(editIndex));
+			}else if(event.keyCode == "13"){
+				event.preventDefault();
+				$("#sendBtn").click();
+			};
+			
+		});
+		
 		// enterPress(ff);
 
 	});

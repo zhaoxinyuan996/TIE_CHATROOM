@@ -8,8 +8,8 @@
 	
 	<link rel="stylesheet" href="../static/layui/css/layui.css">
 	<link rel="stylesheet" href="../static/css/base.css">
-	<script src="../static/layui/layui.all.js"></script>
-	<script src="../static/layui/lay/modules/layer.js"></script>
+	<script src="../static/layui/layui.js"></script>
+	
 	
 	
 
@@ -72,9 +72,11 @@
 		var element = layui.element;
 		element.init();
 	});
+	layui.use('layer', function(){
+		layer = layui.layer;
+	}); 
 	layui.use(["jquery"], function(){
 		var $ = jQuery = layui.$;
-		var layer = layui.layer;
 		
 		// 改变窗口大小
 		window.onresize = function(){
@@ -106,6 +108,11 @@
 			};
 		};
 		window.onload = function(){
+			document.body.onkeydown = function (event) {
+				if(event.keyCode == "13"){
+					return false;
+				};
+			}
 			//单个使用
 			var openChatroom = layer.open({
 				title: ["T I E", "font-size:18px;"],
