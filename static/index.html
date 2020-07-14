@@ -9,10 +9,6 @@
 	<link rel="stylesheet" href="../static/layui/css/layui.css">
 	<link rel="stylesheet" href="../static/css/base.css">
 	<script src="../static/layui/layui.js"></script>
-	
-	
-	
-
 </head>
 <body style="height: 100%;">
 		<!-- 导航栏 -->
@@ -54,7 +50,6 @@
 	function restore($){
 		// 隐藏最大化按钮
 		$(".layui-layer").css({"min-width": 400});
-		// 重新计算宽高保证居中 iframe本身的宽度有问题，没有自适应
 		var width = document.querySelector(".layui-layer").style.width;
 		var height = document.querySelector(".layui-layer").style.height;
 		var seeWidth = document.body.scrollWidth;
@@ -96,22 +91,19 @@
 				$(".layui-layer").css({"left": (seeWidth - width) * 0.5});
 				$(".layui-layer").css({"top": (seeHeight - height) * 0.5});
 				// 页面大小改变后iframe页面也要调整高度
-				var tittleHeight = toNum($(".layui-layer-title").css("height"));
-				$(".layui-layer").css("height", height - tittleHeight);
+				// var tittleHeight = toNum($(".layui-layer-title").css("height"));
+				// $(".layui-layer").css("height", height - tittleHeight);
 				// 跨域设置子页面高度
 				// $("#layui-layer-iframe100001").contents().find("#sendBtn").hide();
 			}else if(iframeSize == "min"){
+				console.log(seeWidth - boxWidth)
+				$(".layui-layer").css({"position": ""});
 				$(".layui-layer").css({"min-width": boxWidth});
 				$(".layui-layer").css({"left": seeWidth - boxWidth});
 				$(".layui-layer").css({"top": seeHeight - boxHeight});
 			};
 		};
 		window.onload = function(){
-			document.body.onkeydown = function (event) {
-				if(event.keyCode == "13"){
-					return false;
-				};
-			}
 			//单个使用
 			var openChatroom = layer.open({
 				title: ["T I E", "font-size:18px;"],
@@ -128,6 +120,7 @@
 					layero.find(".layui-layer-max").hide();
 					$(".layui-layer").css("overflow", "hidden");
 					$(".layui-layer").css({"min-width": 400});
+					
 				},
 				full: function(layero) {
 						layer.restore(openChatroom);
@@ -142,24 +135,17 @@
 					resize($);
 				},
 			});
-			// layer.min(openChatroom);
+			iframeSize = "max";
+			resize($);
 			//重新渲染
 			var reRendering = function(){
 				// 全局导航 .layui-nav
 				// 聊天室标题 .layui-layer-title
-
 				$(".layui-nav").css("background-color","#f2debd");
 				$(".layui-layer-title").css("background-color","#f2debd");
 			};
 			reRendering();
 		};
-	
-	// layer.full(openChatroom);
-	
-	//全局使用。即所有弹出层都默认采用，但是单个配置skin的优先级更高
-	// layer.config({
-	// 	skin: "demo-class",
-	// });
 	});
 </script>
 </html>

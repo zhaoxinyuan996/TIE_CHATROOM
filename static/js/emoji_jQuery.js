@@ -42,10 +42,11 @@
 
 			e.stopPropagation();
 		});
-		
+		// 表情的点击事件
 		$(document).click(function(){
 			$(".emoji-box").hide();
 			$(".emoji-box").remove();
+			$("#content").focus();
 		});
     }
     function createBtnList(arr){

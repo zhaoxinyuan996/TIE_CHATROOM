@@ -294,8 +294,8 @@ function(e, t) {
         t.fixed || (e.offsetTop = /%$/.test(e.offsetTop) ? n.height() * parseFloat(e.offsetTop) / 100 : parseFloat(e.offsetTop), e.offsetLeft = /%$/.test(e.offsetLeft) ? n.width() * parseFloat(e.offsetLeft) / 100 : parseFloat(e.offsetLeft), e.offsetTop += n.scrollTop(), e.offsetLeft += n.scrollLeft()),
         // i.attr("minLeft") && (e.offsetTop = n.height() - (i.find(l[1]).outerHeight() || 0), e.offsetLeft = i.css("left")),
         i.css({
-            top: e.offsetTop,
-            left: e.offsetLeft
+            // top: e.offsetTop,
+            // left: e.offsetLeft
         })
     },
 	// 这个是坐标

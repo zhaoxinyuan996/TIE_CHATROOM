@@ -13,7 +13,7 @@
 	<script src="../static/js/emoji_jQuery.js"></script>
 </head>
 <body style="height: 100%">
-	<div class="" style="height: 100%; width: 100%;">
+	<div id="chatDiv" style="height: 100%; width: 100%;">
 		<div class="" style="height: calc(75% - 30px);">
 			<!-- 大框，包括输入昵称，选择聊天室，连接按钮 -->
 			<ul class="layui-nav" id="chatTittle" style="background-color: #9F9F9F;">
@@ -28,19 +28,19 @@
 					</dl>
 				</li>
 				<li class="layui-nav-item">
-			<button type="button" id="clearBtn" class="layui-btn layui-btn-sm layui-btn-primary" style="float: right;">
+			<button type="button" id="connectBtn" value=true class="layui-btn layui-btn-sm layui-btn-primary" style="float: right;">
 				<i class="layui-icon">&#xe64c;</i>连接
 			</button>
 				</li>
 			</ul>
 			<!-- 聊天展示区 -->
-			<div id="chatShow" style="background-color: #eaeaea; height: 100%; overflow-y: auto;">
+			<div id="chatShow" style="height: 100%; overflow-y: auto;">
 			</div>
 		</div>
 		<!-- 聊天键入区 -->
 		<div style="background-color: #C2C2C2; height: 25%; overflow:hidden;">
 			<div class="layui-layedit" style="height: 100%;">
-				<div id="div_emoji" style="height: 30px;background-color: #C9C9C9;">
+				<div id="div_emoji" style="height: 30px;">
 					<i id="personEmoji" class="layui-icon" style="margin: 5px; font-size: 20px;" title="人物">😀</i>
 					<i id="goodsEmoji" class="layui-icon" style="margin: 5px; font-size: 20px;" title="物品">📦</i>
 					<i id="flagEmoji" class="layui-icon" style="margin: 5px; font-size: 20px;" title="标志">🕞</i>
@@ -56,7 +56,7 @@
 			</div>
 		</div>
 		<!-- 功能区 -->
-		<div style="background-color: #C2C2C2; height: 0%; width: 100%;">
+		<div style="height: 0%; width: 100%;">
 			<button type="button" id="sendBtn" class="layui-btn layui-btn-sm layui-btn-primary" style="float: right;">
 				<i class="layui-icon">&#x1005;</i>发送
 			</button>
@@ -100,17 +100,17 @@
 	// };
 
 	var div = document.getElementById("chatShow");
-	var sTemplate1 = '<div><div><div style="background-color: #26a69a; border-radius:10px; margin: 2px 5px; padding: 8px; display:inline-block; *display:inline; *zoom:1;">'
+	var sTemplate1 = '<div><div><div style="background-color: #f2debd; border-radius:10px; margin: 2px 5px; padding: 8px; display:inline-block; *display:inline; *zoom:1;">'
 	// var sTemplate2 = '<i class="layui-icon">&#xe735;</i>'
 	// var sTemplate3 = '用户名：'
-	var sTemplate4 = '</div></div><div style="background-color: #26a69a; border-radius:10px; margin: 10px 50px; padding: 8px; display:inline-block; *display:inline; *zoom:1;">'
+	var sTemplate4 = '</div></div><div style="background-color: #f2debd; border-radius:10px; margin: 10px 50px; padding: 8px; display:inline-block; *display:inline; *zoom:1;">'
 	// var sTemplate5 = '说的话说'
 	var sTemplate6 = '</div></div>'
 	
-	var cTemplate1 = '<div style="overflow:hidden;"><div style="overflow:hidden;"><div style="background-color: #26a69a; border-radius:10px; margin: 2px 5px; padding: 8px; display:inline-block; *display:inline; *zoom:1; float: right;">'
+	var cTemplate1 = '<div style="overflow:hidden;"><div style="overflow:hidden;"><div style="background-color: #f2debd; border-radius:10px; margin: 2px 5px; padding: 8px; display:inline-block; *display:inline; *zoom:1; float: right;">'
 	// var cTemplate2 = '<i class="layui-icon">&#xe735;</i>'
 	// var cTemplate3 = '自己：'
-	var cTemplate4 = '</div></div><div style="background-color: #26a69a; border-radius:10px; margin: 10px 50px; padding: 8px; display:inline-block; *display:inline; *zoom:1; float: right;">'
+	var cTemplate4 = '</div></div><div style="background-color: #f2debd; border-radius:10px; margin: 10px 50px; padding: 8px; display:inline-block; *display:inline; *zoom:1; float: right;">'
 	// var cTemplate5 = '自己的话自己的话自'
 	var cTemplate6 = '</div></div>'
 
@@ -171,24 +171,24 @@
 				});
 			$(".layui-nav-child").css("visibility", "hidden");
 			// 按钮变成断开
-			$("#connectBtn").html("断开");
+			$("#connectBtn").html('<i class="layui-icon">&#xe64c;</i>断开');
 			connection = true;
 		};
 		// 断开刷新元素
 		function disconnect(){
-			// 锁定昵称栏
+			// 解锁昵称栏
 			$("#userName").css({
 				"cursor": "",
 				"background": "",
 				});
-			// 锁定聊天室选择器
+			// 解锁聊天室选择器
 			$("#chooseRoomBtn").css({
 				"cursor": "",
 				"background": "",
 				});
 			$(".layui-nav-child").css("visibility", "");
-			// 按钮变成断开
-			$("#connectBtn").html("连接");
+			// 按钮变成连接
+			$("#connectBtn").html('<i class="layui-icon">&#xe64c;</i>连接');
 			connection = false;
 		};
 		
@@ -216,7 +216,7 @@
 		// 这里是点击连接按钮 触发 连接，成功后锁定昵称栏，聊天室，按钮text设置成断开，断开时恢复
 		$("#connectBtn").click(function(){
 			// 判断连接状态
-			if ($("#connectBtn").html() == "连接"){
+			if ($("#connectBtn")[0].value){
 				// 校验字段
 				if (checkt_field() != true){
 					return
@@ -248,7 +248,6 @@
 				};
 			}else{
 				// 断开
-				// 断开这里可能有小问题
 				websocket.send("\\x03\\xe9");
 				disconnect();
 			};
@@ -267,6 +266,7 @@
 		if(event.ctrlKey && event.keyCode == "13"){
 			$("#content").val($("#content").val() + "\n");
 		}else if(event.keyCode == "13"){
+			event.preventDefault();
 			$("#sendBtn").click();
 		};
 	});
@@ -285,7 +285,7 @@
 			return
 		}else{
 			websocket.send(JSON.stringify({"message":$("#content").val()}));
-			layedit.clear(editIndex);
+			$("#content").val("");
 		}
 	});
 
@@ -356,13 +356,17 @@
 <script type="text/javascript">
 	//重新渲染
 	var reRendering = function(){
+		// 聊天室背景 #chatDiv
 		// 聊天室导航 #chatTittle
-		// 聊天室背景 #chatShow
 		// 聊天室表情栏 #div_emoji #layui-layer-iframe1
+		// chatShow
 		
+		$("#chatDiv").css("background-color","#f2debd");
 		$("#chatTittle").css("background-color","#d5c3a6");
-		$("#chatShow").css("background-color","#ffeadc");
 		$("#div_emoji").css("background-color","#f2debd");
+		$("#chatShow").css("background-color","#ffeadc");
+		$("#content").css("background-color","#ffeadc");
+		
 	};
 	reRendering();
 </script>
