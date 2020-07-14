@@ -5,20 +5,21 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta http-equiv="X-UA-Compatible" content="ie=edge">
 	<title></title>
+	<link rel="stylesheet" href="../static/css/emoji.css">
 	<link rel="stylesheet" href="../static/layui/css/layui.css">
 	<script src="../static/layui/layui.js"></script>
 	<script src="../static/layui/lay/modules/element.js"></script>
-	<script src="../static/layui/lay/modules/layedit.js"></script>
-	<script src="../static/layui/lay/modules/jquery.js"></script>
+	<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.js"></script>
+	<script src="../static/js/emoji_jQuery.js"></script>
 </head>
 <body style="height: 100%">
 	<div class="" style="height: 100%; width: 100%;">
 		<div class="" style="height: calc(75% - 30px);">
 			<!-- 大框，包括输入昵称，选择聊天室，连接按钮 -->
-			<ul class="layui-nav" lay-filter="" style="background-color: #9F9F9F; height: 60px;">
-				<li class="layui-nav-item"><input type="text" name="" id="userName" value="你的昵称" /></input></li>
+			<ul class="layui-nav" id="chatTittle" style="background-color: #9F9F9F;">
+				<li class="layui-nav-item"><input type="text" style="border-radius: 5px; height: 25px;" id="userName" value="你的昵称"/></input></li>
 				<li class="layui-nav-item">
-					<a href="javascript:;" id="chooseRoomBtn">选择聊天室</a>
+					<a href="javascript:;" id="chooseRoomBtn">请选择</a>
 					<dl class="layui-nav-child">
 						<dd><a id="chooseRoomT">T-娱乐室</a></dd>
 						<dd><a id="chooseRoomI">I -数码室</a></dd>
@@ -26,30 +27,43 @@
 						<dd><a id="chooseRoomZ">Z-杂谈室</a></dd>
 					</dl>
 				</li>
-		
-				<li class="layui-nav-item"><button type="button" class="layui-btn layui-btn-radius layui-btn-primary" id="connectBtn">连接</button></li>
+				<li class="layui-nav-item">
+			<button type="button" id="clearBtn" class="layui-btn layui-btn-sm layui-btn-primary" style="float: right;">
+				<i class="layui-icon">&#xe64c;</i>连接
+			</button>
+				</li>
 			</ul>
 			<!-- 聊天展示区 -->
-			<div id="chatShow" style="background-color: #C2C2C2; height: 100%; overflow-y: auto;">
-		
-				
+			<div id="chatShow" style="background-color: #eaeaea; height: 100%; overflow-y: auto;">
 			</div>
-				
+		</div>
+		<!-- 聊天键入区 -->
+		<div style="background-color: #C2C2C2; height: 25%; overflow:hidden;">
+			<div class="layui-layedit" style="height: 100%;">
+				<div id="div_emoji" style="height: 30px;background-color: #C9C9C9;">
+					<i id="personEmoji" class="layui-icon" style="margin: 5px; font-size: 20px;" title="人物">😀</i>
+					<i id="goodsEmoji" class="layui-icon" style="margin: 5px; font-size: 20px;" title="物品">📦</i>
+					<i id="flagEmoji" class="layui-icon" style="margin: 5px; font-size: 20px;" title="标志">🕞</i>
+					<i id="naturalEmoji" class="layui-icon" style="margin: 5px; font-size: 20px;" title="自然">🌸</i>
+					<i id="arrowEmoji" class="layui-icon" style="margin: 5px; font-size: 20px;" title="箭头">👏</i>
+					<i id="animalEmoji" class="layui-icon" style="margin: 5px; font-size: 20px;" title="动物">🐴</i>
+					<i id="sportsEmoji" class="layui-icon" style="margin: 5px; font-size: 20px;" title="运动">⛷️</i>
+					<i id="foodEmoji" class="layui-icon" style="margin: 5px; font-size: 20px;" title="食物">🍋</i>
+					<i id="buildingEmoji" class="layui-icon" style="margin: 5px; font-size: 20px;" title="建筑">🏤</i>
+					<i id="trafficEmoji" class="layui-icon" style="margin: 5px; font-size: 20px;" title="交通">🚍</i>
+				</div>
+				<textarea id="content" style="width: 100%; height: 100%; font-size:15px; resize: none; box-sizing: border-box;"></textarea>
 			</div>
-			<!-- 聊天键入区 -->
-			<div style="background-color: #C2C2C2; height: 25%; overflow:hidden;">
-				<textarea id="input" style="width: 100%; height: 100%; resize: none; box-sizing: border-box;">内容</textarea>
-			</div>
-			<!-- 功能区 -->
-			<div style="background-color: #C2C2C2; height: 0%; width: 100%;">
-				<button type="button" id="sendBtn" class="layui-btn layui-btn-sm layui-btn-primary" style="float: right;">
-				  <i class="layui-icon">&#x1005;</i>发送
-				</button>
-				<button type="button" id="clearBtn" class="layui-btn layui-btn-sm layui-btn-primary" style="float: right;">
-				  <i class="layui-icon">&#x1006;</i>清空
-				</button>
-		
-			</div>
+		</div>
+		<!-- 功能区 -->
+		<div style="background-color: #C2C2C2; height: 0%; width: 100%;">
+			<button type="button" id="sendBtn" class="layui-btn layui-btn-sm layui-btn-primary" style="float: right;">
+				<i class="layui-icon">&#x1005;</i>发送
+			</button>
+			<button type="button" id="clearBtn" class="layui-btn layui-btn-sm layui-btn-primary" style="float: right;">
+				<i class="layui-icon">&#x1006;</i>清空
+			</button>
+	
 		</div>
 	</div>
 </body>
@@ -57,12 +71,6 @@
 	window.onload = function(){
 		var seeWidth = document.body.clientWidth;
 		var seeHeight = document.body.clientHeight;
-		
-		document.body.onkeydown = function (event) {
-			if(event.keyCode == "13"){
-				return false;
-			};
-		}
 	};
 	var lvSDict = {
 		0:'<i class="layui-icon" style="color: #FFECEC;">&#xe735;</i>',
@@ -254,64 +262,108 @@
 		var element = layui.element;
 		element.init();
 	});
-	layui.use('layedit', function(){
-		var layedit = layui.layedit;
-		var editIndex = layedit.build(
-		  "input", {
-				"tool": [
-					'face'	//表情
-				],
-				"height": "100%"
-				}
-		);		//建立编辑器
-		
-		 // 清空按钮
-		$("#clearBtn").click(function(){
-			// $("#input").val("");
-			layedit.clear(editIndex);
-		 });
-		 // 发送按钮
-		$("#sendBtn").click(function(){
-			if(connection != true){
-				alert("请连接后发送")
-				return;
-			};
-			// 发送
-			if(layedit.getText(editIndex) == ""){
-				return
-			}else{
-				websocket.send(JSON.stringify({"message":layedit.getText(editIndex)}));
-				layedit.clear(editIndex);
-			}
-		});
-		function setFocus(el) {
-		    el = el[0]; // jquery 对象转dom对象  
-		    el.focus();
-		    var range = document.createRange();
-		    range.selectNodeContents(el);
-		    range.collapse(false);
-		    var sel = window.getSelection();
-			sel.removeAllRanges();
-			sel.addRange(range);
-			console.log($("#LAY_layedit_1")[0].contentWindow.document);
-			range.setStart($("#LAY_layedit_1")[0].contentWindow.document, 2);
-			console.log(range);
+	// 键盘事件
+	$("#content").keydown(function(event){
+		if(event.ctrlKey && event.keyCode == "13"){
+			$("#content").val($("#content").val() + "\n");
+		}else if(event.keyCode == "13"){
+			$("#sendBtn").click();
 		};
-		// 这个给跪了，解决在子iframe中键盘事件监听不到的bug
-		$($("#LAY_layedit_1")[0].contentWindow.document).keydown(function(event){
-			if(event.ctrlKey && event.keyCode == "13"){
-				layedit.newLine(editIndex);
-				setFocus($("#LAY_layedit_1"));
-				// console.log(layedit.getContent(editIndex));
-			}else if(event.keyCode == "13"){
-				event.preventDefault();
-				$("#sendBtn").click();
-			};
-			
-		});
-		
-		// enterPress(ff);
-
 	});
+	 // 清空按钮
+	$("#clearBtn").click(function(){
+		$("#content").val("");
+	 });
+	 // 发送按钮
+	$("#sendBtn").click(function(){
+		if(connection != true){
+			alert("请连接后发送")
+			return;
+		};
+		// 发送
+		if($("#content").val() == ""){
+			return
+		}else{
+			websocket.send(JSON.stringify({"message":$("#content").val()}));
+			layedit.clear(editIndex);
+		}
+	});
+
+</script>
+<script type="text/javascript">
+	// 输入框+图标
+	$("#personEmoji").emoji({content_el:"#content",
+	list:[{
+				name:"人物",
+				code:"personEmoji",
+			}],
+	});
+	$("#goodsEmoji").emoji({content_el:"#content",
+				list:[{
+					name:"物品",
+					code:"goodsEmoji",
+					}],
+		});
+		$("#flagEmoji").emoji({content_el:"#content",
+				list:[{
+					name:"标志",
+					code:"flagEmoji",
+					}],
+			});
+		$("#naturalEmoji").emoji({content_el:"#content",
+				list:[{
+					name:"自然",
+					code:"naturalEmoji",
+					}],
+			});
+		$("#arrowEmoji").emoji({content_el:"#content",
+				list:[{
+					name:"箭头",
+					code:"arrowEmoji",
+					}],
+			});
+		$("#animalEmoji").emoji({content_el:"#content",
+				list:[{
+					name:"动物",
+					code:"animalEmoji",
+					}],
+			});
+		$("#sportsEmoji").emoji({content_el:"#content",
+				list:[{
+					name:"运动",
+					code:"sportsEmoji",
+					}],
+			});
+		$("#foodEmoji").emoji({content_el:"#content",
+				list:[{
+					name:"食物",
+					code:"foodEmoji",
+					}],
+			});
+		$("#buildingEmoji").emoji({content_el:"#content",
+				list:[{
+					name:"建筑",
+					code:"buildingEmoji",
+					}],
+			});
+		$("#trafficEmoji").emoji({content_el:"#content",
+				list:[{
+					name:"交通",
+					code:"trafficEmoji",
+					}],
+			});
+</script>
+<script type="text/javascript">
+	//重新渲染
+	var reRendering = function(){
+		// 聊天室导航 #chatTittle
+		// 聊天室背景 #chatShow
+		// 聊天室表情栏 #div_emoji #layui-layer-iframe1
+		
+		$("#chatTittle").css("background-color","#d5c3a6");
+		$("#chatShow").css("background-color","#ffeadc");
+		$("#div_emoji").css("background-color","#f2debd");
+	};
+	reRendering();
 </script>
 </html>

@@ -16,8 +16,8 @@
 </head>
 <body style="height: 100%;">
 		<!-- 导航栏 -->
-	<ul class="layui-nav" style="text-align: center;background-color: #26a69a;">
-		<li class="layui-nav-item" style="font-size: x-large; color: #F5FDC6;font-family: mFont;">Take It Easy</li>
+	<ul class="layui-nav" style="text-align: center;">
+		<li class="layui-nav-item" style="font-size: x-large; font-family: mFont;">Take It Easy</li>
 		<!-- 下面应该是弹窗 -->
 		<!-- TODO 这个可以用弹出层，如果没bug的话 -->
 		<li class="layui-nav-item" style="float: right;"><a>关于我们</a></li>
@@ -47,7 +47,7 @@
 		$(".layui-layer").css({"left": seeWidth - boxWidth});
 		$(".layui-layer").css({"top": seeHeight - boxHeight});
 		
-		$("#layui-layer-shade100001").hide();
+		$(".layui-layer-shade").hide();
 		
 		iframeSize = "min";
 	};
@@ -63,7 +63,7 @@
 		$(".layui-layer").css({"left": (seeWidth - toNum(width)) * 0.5});
 		$(".layui-layer").css({"top": (seeHeight - toNum(height)) * 0.5});
 		
-		$("#layui-layer-shade100001").show();
+		$(".layui-layer-shade").show();
 		
 		iframeSize = "max";
 	};
@@ -76,7 +76,7 @@
 		layer = layui.layer;
 	}); 
 	layui.use(["jquery"], function(){
-		var $ = jQuery = layui.$;
+		$ = jQuery = layui.$;
 		
 		// 改变窗口大小
 		window.onresize = function(){
@@ -97,11 +97,10 @@
 				$(".layui-layer").css({"top": (seeHeight - height) * 0.5});
 				// 页面大小改变后iframe页面也要调整高度
 				var tittleHeight = toNum($(".layui-layer-title").css("height"));
-				$("#layui-layer-iframe100001").css("height", height - tittleHeight);
+				$(".layui-layer").css("height", height - tittleHeight);
 				// 跨域设置子页面高度
 				// $("#layui-layer-iframe100001").contents().find("#sendBtn").hide();
 			}else if(iframeSize == "min"){
-				
 				$(".layui-layer").css({"min-width": boxWidth});
 				$(".layui-layer").css({"left": seeWidth - boxWidth});
 				$(".layui-layer").css({"top": seeHeight - boxHeight});
@@ -123,6 +122,7 @@
 				area: ["40%", "80%"],				// 弹出的宽高
 				closeBtn: 0,						// 没有关闭按钮
 				maxmin: true,						// 支持最大最小化
+				shade: [0.1, '#555555'],			// 遮罩颜色
 				shadeClose: true,
 				success: function(layero){
 					layero.find(".layui-layer-max").hide();
@@ -135,19 +135,23 @@
 				min: function(layero){
 					layero.find(".layui-layer-max").show();
 					min($);
-
-					
 				},
 				restore: function(layero){
 					layero.find(".layui-layer-max").hide();
 					restore($);
 					resize($);
-					
 				},
-				
 			});
 			// layer.min(openChatroom);
-			
+			//重新渲染
+			var reRendering = function(){
+				// 全局导航 .layui-nav
+				// 聊天室标题 .layui-layer-title
+
+				$(".layui-nav").css("background-color","#f2debd");
+				$(".layui-layer-title").css("background-color","#f2debd");
+			};
+			reRendering();
 		};
 	
 	// layer.full(openChatroom);
