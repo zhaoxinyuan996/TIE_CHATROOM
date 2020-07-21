@@ -182,7 +182,11 @@ class SqliteDb():
 
 if __name__ == '__main__':
     with SqliteDb() as sql:
-        print(sql.execute("SELECT * FROM sqlite_master WHERE type='table'"))
+        # print(sql.execute("SELECT * FROM sqlite_master WHERE type='table'"))
+        import pdb; pdb.set_trace()
+        pass
+        pass
+        pass
     # insert(self, tittle, time, abstract, url, *purls)
 
 
