@@ -11,8 +11,8 @@ from tools.thesaurus import sqlFilterTool
 
 
 def page_num(request):
-    type = request.GET.get('type')          # str
-    limit = request.GET.get('limit')        # int
+    type = request.POST.get('type')          # str
+    limit = request.POST.get('limit')        # int
 
     if not type or not limit:
         return HttpResponse(b'FORCE EXIT', status=403)
@@ -32,16 +32,16 @@ def page_num(request):
 
 
 def page(request):
-    type = request.GET.get('type')          # str
-    limit = request.GET.get('limit')        # int
-    pageNum = request.GET.get('pageNum')    # int
+    body = json.loads(request.body)
+    type = body.get('type')          # str
+    limit = body.get('limit')        # int
+    pageNum = body.get('pageNum')    # int
 
     if not type or not limit or not pageNum:
         return HttpResponse(b'FORCE EXIT', status=403)
 
-    code = sqlFilterTool.deal(limit, pageNum)
-    if not code:
-        myLog.warning('SQL注入，%s' % code)
+    if not isinstance(limit, int) or not isinstance(pageNum, int):
+        myLog.warning('SQL注入，%s' % ((limit, pageNum), ))
         return HttpResponse(b"SQL INJECTION", status=403)
 
     form = {'data': []}
@@ -58,6 +58,5 @@ def page(request):
                 tittle, releaseTime, abstract, url, *purls = i
                 form['data'].append([tittle, releaseTime, abstract, url, purls])
         else:
-            form['data'].append(res)
-
+            form['data'].append(str(res))
         return HttpResponse(json.dumps(form).encode())

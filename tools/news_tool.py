@@ -1,10 +1,13 @@
 import time
 import sqlite3
+import platform
 
 from collections import OrderedDict
 
 from TIE.settings import dbPath
 
+if 'win' in platform.system().lower():
+    dbPath = 'db.sqlite3'
 
 def to_stamp(t: str) -> int:
     defaultTime = list(time.strftime('%Y%m%d%H%M'))
@@ -179,10 +182,7 @@ class SqliteDb():
 
 if __name__ == '__main__':
     with SqliteDb() as sql:
-        import pdb; pdb.set_trace()
-        pass
-        pass
-        pass
+        print(sql.execute("SELECT * FROM sqlite_master WHERE type='table'"))
     # insert(self, tittle, time, abstract, url, *purls)
 
 

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh" style="height: 100%;">
+<html lang="zh" style="height: 100%; width: 100%;">
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,18 +10,47 @@
 	<link rel="stylesheet" href="../static/css/base.css">
 	<script src="../static/layui/layui.js"></script>
 </head>
-<body style="height: 100%;">
+<body style="height: 100%; width: 100%">
 		<!-- 导航栏 -->
-	<ul class="layui-nav" style="text-align: center;">
-		<li class="layui-nav-item" style="font-size: x-large; font-family: mFont;">Take It Easy</li>
+	<ul class="layui-nav">
+		<li class="layui-nav-item" style="font-size: x-large; font-family: mFont; left: 45%;">Take It Easy</li>
 		<!-- 下面应该是弹窗 -->
 		<!-- TODO 这个可以用弹出层，如果没bug的话 -->
 		<li class="layui-nav-item" style="float: right;"><a>关于我们</a></li>
-		<li class="layui-nav-item" style="float: right;"><a>用户须知</a></li>
+		<li class="layui-nav-item" style="float: right;"><a id="userNotice">用户须知</a></li>
 		<li class="layui-nav-item" style="float: right;"><a>最新公告</a></li>
 	</ul>
-	 
 	
+	<!-- 资讯版 -->
+	<div style="height: calc(100% - 60px);">
+		<!-- 资讯导航 -->
+		<div style="margin: auto; width: 300px; font-size:30px" class="layui-breadcrumb" lay-separator=" |">
+			<a>首页</a>
+			<a>娱乐</a>
+			<a>电竞</a>
+			<a>数码</a>
+			<a>杂谈</a>
+		</div>
+		<!-- 资讯 -->
+		<div style="height:calc(100% - 95px)">
+			<div style="margin: auto; height: 100%; width: 60%; min-width: 80%; background-color: beige;">
+				<div style="width: 50%; height: 100%; float: left;">
+					<div id="news1" style="width: 50%; height: 33%;"></div>
+					<div id="news4" style="width: 50%; height: 33%;"></div>
+					<div id="news6" style="width: 50%; height: 33%;"></div>
+				</div>
+				<div style="width: 50%; height: 100%; float: right;">
+					<div id="news2" style="width: 50%; height: 33%;"></div>
+					<div id="news5" style="width: 50%; height: 33%;"></div>
+					<div id="news7" style="width: 50%; height: 33%;"></div>
+				</div>
+			</div>
+		</div>
+		<!-- 分页栏 -->
+		<div id="newsPlate" style="text-align: center;"></div>
+	</div>
+
+
 
 </body>
 <script>
@@ -72,7 +101,6 @@
 	}); 
 	layui.use(["jquery"], function(){
 		$ = jQuery = layui.$;
-		
 		// 改变窗口大小
 		window.onresize = function(){
 			resize($);
@@ -96,7 +124,6 @@
 				// 跨域设置子页面高度
 				// $("#layui-layer-iframe100001").contents().find("#sendBtn").hide();
 			}else if(iframeSize == "min"){
-				console.log(seeWidth - boxWidth)
 				$(".layui-layer").css({"position": ""});
 				$(".layui-layer").css({"min-width": boxWidth});
 				$(".layui-layer").css({"left": seeWidth - boxWidth});
@@ -120,6 +147,7 @@
 					layero.find(".layui-layer-max").hide();
 					$(".layui-layer").css("overflow", "hidden");
 					$(".layui-layer").css({"min-width": 400});
+					layero.customId = 'idddd';
 					
 				},
 				full: function(layero) {
@@ -145,8 +173,59 @@
 				$(".layui-layer-title").css("background-color","#f2debd");
 			};
 			reRendering();
+			layui.use('laypage', function(){
+				var laypage = layui.laypage;
+			
+				//执行一个laypage实例
+				laypage.render({
+					elem: 'newsPlate', //注意，这里的 test1 是 ID，不用加 # 号
+					count: 50 //数据总数，从服务端得到
+				});
+			});
 		};
+		// ajax
+		$.ajax({
+			url: "/news/page",
+			type: "POST",
+			dataType: "json",
+			data: JSON.stringify({
+				'type': 'all',
+				'limit': 10,
+				'pageNum': 6
+			}),
+			success: function(){
+				console.log('done');
+			},
+		});
+		
+		$("#userNotice").click(function(){
+			layer.open({
+				type: 1
+				,title: false //不显示标题栏
+				,closeBtn: false
+				,area: ["40%", "80%"]
+				,shade: 0.8
+				,id: 'layerUserNotice' //设定一个id，防止重复弹出
+				,btn: ['我知道了']
+				,btnAlign: 'c'
+				,moveType: 1 //拖拽模式，0或者1
+				,content: '<div style="padding: 50px; line-height: 22px; background-color: #393D49; color: #fff; font-weight: 300;">你知道吗？亲！<br>layer ≠ layui<br><br>layer只是作为Layui的一个弹层模块，由于其用户基数较大，所以常常会有人以为layui是layerui<br><br>layer虽然已被 Layui 收编为内置的弹层模块，但仍然会作为一个独立组件全力维护、升级。<br><br>我们此后的征途是星辰大海 ^_^</div>'
+				,success: function(layero){
+					
+					// layero.css("left", "0");
+					// layero.css("right", "0");
+					// layero.css("top", "0");
+					// layero.css("bottom", "0");
+					// layero.css("margin", "auto");
+				}
+			});
+		});
 	});
+
+</script>
+<script>
+	// 公告类弹窗
+
 </script>
 </html>
 <!-- 断连有问题，断连逻辑应该重写，如果本地主动断连，就不弹窗 -->
