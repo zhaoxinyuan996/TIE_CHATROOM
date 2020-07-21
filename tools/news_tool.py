@@ -4,7 +4,7 @@ import platform
 
 from collections import OrderedDict
 
-from TIE.settings import dbPath
+dbPath = '/home/admin/db/tie.db'
 
 if 'win' in platform.system().lower():
     dbPath = 'db.sqlite3'
