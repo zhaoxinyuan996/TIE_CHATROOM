@@ -91,9 +91,13 @@ class ChatUser:
         myLog.error('attr "%s" not exist' % item)
         return None
 
-    def _on_error(self, errorType: str) -> None:
+    def _on_error(self, errorType: str, msg:str=None) -> None:
+        m = {
+            'error': errorType,
+            'msg': msg if not msg else ''
+        }
         self._handshake()
-        self.send(errorType.encode())
+        self.send(json.dumps(m).encode())
         self.close()
 
     @staticmethod
@@ -114,7 +118,7 @@ class ChatUser:
             raise CustomCliNameError(self)
 
         if len(self.chatPool[self.roomNum][0]) >= ChatRoomPoolConf.userNumLimit:
-            raise CustomUserOverLimit
+            raise CustomUserOverLimit(self)
 
         # 空间和时间哪个重要
         name = name.replace(' ', '')

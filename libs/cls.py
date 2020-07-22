@@ -15,7 +15,7 @@ from TIE.settings import StaticConf
 class BaseError(Exception):
     def __init__(self, userObj, *args):
         super().__init__(*args)
-        userObj._on_error(self.__class__.__name__)
+        userObj._on_error(self.__class__.__name__, *args)
 
     def __str__(self) -> str:
         return type(self).__name__ + (':' + (''.join(self.args)).__repr__() if self.args else '')

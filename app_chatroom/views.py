@@ -35,10 +35,10 @@ def _get_static(obj: ChatUser=None, msg=None) -> dict:
     }
     return d
 
-def _check_msg_hack(msg: dict) -> None:
+def _check_msg_hack(msg: dict, obj: ChatUser) -> None:
     for i in msg:
         if i not in ChatUserConf.legalWords:
-            raise CustomHackMsgError
+            raise CustomHackMsgError(obj)
 
 def _all_user_send(m: dict, q: dict) -> None:
     '''m:消息;q:用户池'''
@@ -62,7 +62,7 @@ def _speak(obj:ChatUser, msg: bytes) -> None:
     try: msg = json.loads(msg)
     except: return
 
-    # _check_msg_hack(msg)  # 调试时候放开检测， 这个前后端一定对齐，出错就断连
+    # _check_msg_hack(msg, obj)  # 调试时候放开检测， 这个前后端一定对齐，出错就断连
     msg0 = _get_static(obj)
     msg0.update(msg)
 
