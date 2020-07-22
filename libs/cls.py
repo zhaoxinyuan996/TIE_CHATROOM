@@ -13,6 +13,10 @@ from TIE.settings import StaticConf
 
 # 错误基类
 class BaseError(Exception):
+    def __init__(self, userObj, *args):
+        super().__init__(*args)
+        userObj.on_error(self.__class__.__name__)
+
     def __str__(self) -> str:
         return type(self).__name__ + (':' + (''.join(self.args)).__repr__() if self.args else '')
 

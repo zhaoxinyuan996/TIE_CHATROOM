@@ -91,6 +91,11 @@ class ChatUser:
         myLog.error('attr "%s" not exist' % item)
         return None
 
+    def _on_error(self, errorType: str) -> None:
+        self._handshake()
+        self.send(errorType.encode())
+        self.close()
+
     @staticmethod
     def get_ip(request) -> str:
         if 'HTTP_X_FORWARDED_FOR' in request.META:
@@ -102,11 +107,11 @@ class ChatUser:
     def _check_chatroom_num(self) -> str:
         if self.request.GET.get('roomName') in self._r:
             return self.request.GET.get('roomName')
-        raise CustomCliChatroomNameError
+        raise CustomCliChatroomNameError(self)
 
     def _check_name(self, name: str) -> str:
         if not name:
-            raise CustomCliNameError('name is None')
+            raise CustomCliNameError(self)
 
         if len(self.chatPool[self.roomNum][0]) >= ChatRoomPoolConf.userNumLimit:
             raise CustomUserOverLimit
@@ -114,12 +119,12 @@ class ChatUser:
         # 空间和时间哪个重要
         name = name.replace(' ', '')
         if name in (i.name for i in self.chatPool[self.roomNum][0]):
-            raise CustomCliNameSameError
+            raise CustomCliNameSameError(self)
 
         code, msg = wordsFilterTool.deal(name, userInfo=self.ip)
 
         if code: return name
-        raise CustomCliNameError(msg)
+        raise CustomCliNameError(self, msg)
 
     def speak_exp(self) -> None:
         self._sTimes += 1
@@ -181,14 +186,14 @@ class ChatUser:
         while remaining:
             _buffer = self.sock.recv(remaining)
             if not _buffer:
-                raise CustomSerDisconnect('%s 超时' % self.ip)
+                raise CustomSerDisconnect(self, '%s 超时' % self.ip)
             _bytes += _buffer
             remaining = bufsize - len(_bytes)
         return _bytes
 
     def check_syntax(self, msg: bytes) -> bool:
         if msg == b'\x03\xe9' or msg == b'\\x03\\xe9':                     # 断连信号
-            raise CustomCliMsgError('%s 断连' % self.ip)
+            raise CustomCliMsgError(self, '%s 断连' % self.ip)
 
         if b'Masked frame from server' in msg:                             # 忘了，解码出错
             return False
