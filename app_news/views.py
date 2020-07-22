@@ -2,17 +2,16 @@
 
 import json
 
-from math import ceil
 from django.http import HttpResponse
 
 from libs import myLog
 from tools.news_tool import SqliteDb
-from tools.thesaurus import sqlFilterTool
 
 
 def page_num(request):
-    type = request.POST.get('type')          # str
-    limit = request.POST.get('limit')        # int
+    body = json.loads(request.body)
+    type = body.get('type')          # str
+    limit = body.get('limit')        # int
 
     if not type or not limit:
         return HttpResponse(b'FORCE EXIT', status=403)
@@ -24,7 +23,7 @@ def page_num(request):
     with SqliteDb() as db:
         code, res = db.base_r(sel='count("tittle")', eqWhe=eqWhe)
         if code:
-            form['pageNum'] = ceil(res[0][0] / limit)
+            form['pageNum'] = res[0][0]
         else:
             form['pageNum'] = res
 
@@ -47,16 +46,17 @@ def page(request):
     form = {'data': []}
     limit = int(limit)
     pageNum = int(pageNum)
-    _min = limit * (pageNum - 1)
-    limit = 'order by `time` limit %s,%s' % (_min, pageNum)
+    min = limit * (pageNum - 1)
+    limit = 'order by `time` limit %s,%s' % (min, limit)
 
     with SqliteDb() as db:
-        eqWhe = {'type': type}
+        eqWhe = {'type': type} if type != 'all' else {}
         code, res = db.base_r(eqWhe=eqWhe, suffix=limit)
         if code:
             for i in res:
-                tittle, releaseTime, abstract, url, *purls = i
-                form['data'].append([tittle, releaseTime, abstract, url, purls])
+                _, tittle, releaseTime, abstract, url, *purls = i
+                form['data'].append([type, tittle, releaseTime, abstract, url, purls])
         else:
             form['data'].append(str(res))
+        form['length'] = len(form['data'])
         return HttpResponse(json.dumps(form).encode())

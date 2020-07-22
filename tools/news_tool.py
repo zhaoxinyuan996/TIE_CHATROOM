@@ -7,7 +7,9 @@ from collections import OrderedDict
 dbPath = '/home/admin/db/tie.db'
 
 if 'win' in platform.system().lower():
-    dbPath = 'db.sqlite3'
+    dbPath = 'tie.db'
+    if __name__ == '__main__':
+        dbPath = '../tie.db'
 
 def to_stamp(t: str) -> int:
     defaultTime = list(time.strftime('%Y%m%d%H%M'))
@@ -46,10 +48,11 @@ class SqliteDb():
     defaultColumn['purl3'] = ''
 
     def __init__(self, logger:FalseLogger=None) -> None:
+        self.dbPath = dbPath
         self.logger = logger if logger else FalseLogger()
 
     def __enter__(self) -> object:
-        self.db = sqlite3.connect(dbPath, isolation_level=None) # 自动事务
+        self.db = sqlite3.connect(self.dbPath, isolation_level=None) # 自动事务
         self.cursor = self.db.cursor()
         return self
 
@@ -182,12 +185,14 @@ class SqliteDb():
 
 if __name__ == '__main__':
     with SqliteDb() as sql:
-        # print(sql.execute("SELECT * FROM sqlite_master WHERE type='table'"))
-        import pdb; pdb.set_trace()
+        for i in sql.execute("SELECT * FROM news")[1]:
+            print(i)
+        # sql.base_u({'purl1':'https://dss0.baidu.com/6ONWsjip0QIZ8tyhnq/it/u=4239889410,3146622490&fm=55&app=54&f=JPEG?w=1140&h=640'})
+        # import pdb; pdb.set_trace()
         pass
         pass
         pass
-    # insert(self, tittle, time, abstract, url, *purls)
+    # insert(type, tittle, time, abstract, url, *purls)
 
 
 '''
