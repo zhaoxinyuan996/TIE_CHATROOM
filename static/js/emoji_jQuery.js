@@ -21,7 +21,6 @@
 			for(var i = 0;i<list.length;i++){
 				emojilist = emojilist+createEmojiList(list[i]);
 			};
-			console.log($(".emoji-box"));
 			if($(".emoji-box").length > 0){
 				$(".emoji-box").remove();
 			};
@@ -32,6 +31,7 @@
 				var content = $(this).html();
 				var contentvalue = $(content_el).val();
 				$("#content").val(contentvalue+content);
+				$("#content").focus();
 				return true;
 			});
 			var offset = $(this).position();
@@ -45,7 +45,7 @@
 		// 表情的点击事件
 		$(document).click(function(){
 			$(".emoji-box").remove();
-			$("#content").focus();
+			// $("#content").focus();
 		});
     }
     function createBtnList(arr){

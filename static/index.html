@@ -201,6 +201,7 @@
 					$("#tittle" + (i + 1)).html(tittle);
 					$("#tittle" + (i + 1)).attr("href", url);
 					$("#abst" + (i + 1)).html(abst);
+					time = new Date(parseInt(1593328500) * 1000).toLocaleString().replace(/:\d{1,2}$/,' ');
 					$("#time" + (i + 1)).html(time);
 				};
 				clear_cute();
@@ -443,11 +444,6 @@
 			});
 		});
 	});
-
-</script>
-<script>
-	// 公告类弹窗
-
 </script>
 </html>
 <!-- 断连有问题，断连逻辑应该重写，如果本地主动断连，就不弹窗 -->

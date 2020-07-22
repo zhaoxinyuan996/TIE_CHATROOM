@@ -94,7 +94,7 @@ class ChatUser:
     def _on_error(self, errorType: str, msg:str=None) -> None:
         m = {
             'error': errorType,
-            'msg': msg if not msg else ''
+            'msg': msg if msg else ''
         }
         self._handshake()
         self.send(json.dumps(m).encode())

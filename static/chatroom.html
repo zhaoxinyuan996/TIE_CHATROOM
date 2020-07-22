@@ -114,10 +114,41 @@
 	// var cTemplate5 = '自己的话自己的话自'
 	var cTemplate6 = '</div></div>'
 
+	//发生错误后的处理，主要是违规相关，弹窗提示
+	function deal_error(allMsg){
+		var error = allMsg.error;
+		var msg = allMsg.msg;
+		// 客户端字段非法
+		if(error == "CustomHackMsgError"){
+			
+		// 客户端用户名非法
+		}else if(error == "CustomCliNameError"){
+			alert(msg);
+		// 聊天室人数已满
+		}else if(error == "CustomUserOverLimit"){
+			alert("当天聊天室人数已满");
+		// 客户端名字重名
+		}else if(error == "CustomCliNameSameError"){
+			alert("重名了哦");
+		// 客户端聊天室非法
+		}else if(error == "CustomCliChatroomNameError"){
+			
+		// 客户端声明断连
+		}else if(error == "CustomCliMsgError"){
+			
+		// 超时未发言服务器主动断连
+		}else if(error == "CustomSerDisconnect"){
+			alert("超时未发言，请保持活跃哦");
+		};
+	};
 	// 接收消息类
 	// TODO 这里的系统消息可以换个样式 要不占位了
 	function RecChat(obj, userName){
 		var allMsg = JSON.parse(obj.data);
+		if(allMsg.hasOwnProperty("error")){
+			deal_error(allMsg);
+			return;
+		};
 		var msgType = allMsg.type;
 		var msgMessage = allMsg.message;
 		var msgTime = allMsg.time;
@@ -233,17 +264,19 @@
 					};
 				// 发生错误
 				websocket.onerror = function (event) {
+					console.log('error', event);
 					// TODO 各种报错逻辑要捕捉
 					if(connection == true){
 						disconnect();
-						alert("连接失败了，我也不知道为啥");
+						// alert("连接失败了，我也不知道为啥");
 					};
 				};
 				// 连接关闭
 				websocket.onclose = function (event) {
+					console.log('close', event);
 					if(connection == true){
 						disconnect();
-						alert("与服务器断开连接，请保持活跃哦~");
+						// alert("与服务器断开连接，请保持活跃哦~");
 					};
 				};
 			}else{
